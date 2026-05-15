@@ -4,16 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Mirai — Donation System Prototype</title>
+<link rel="stylesheet" href="../shared/styles.css">
 <style>
-@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-jp.min.css');
-@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-jp-dynamic-subset.min.css');
-
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{background:#000}
 body{
   font-family:'Pretendard JP','Pretendard Variable',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  font-feature-settings:normal;
+  letter-spacing:normal;
   background:transparent;width:100%;height:100%;overflow:hidden;touch-action:manipulation;
   display:flex;align-items:flex-start;justify-content:center;
+  min-height:auto;
 }
 
 /* ═══ DESIGN TOKENS (MIRAI Dark Mode — tokens.json 기준) ═══ */
@@ -106,9 +107,11 @@ body{
 /* ═══ HEADER ═══ */
 .header{
   position:absolute;top:0;left:0;right:0;z-index:50;
+  height:auto;
   display:flex;align-items:center;justify-content:space-between;
   padding:8px 16px;padding-top:max(8px, env(safe-area-inset-top));
   background:none;
+  backdrop-filter:none;-webkit-backdrop-filter:none;
 }
 .top-gradient{
   position:absolute;top:0;left:0;right:0;
@@ -1263,6 +1266,7 @@ body.intro-mode .stat-panel{display:none !important}
         <button class="prog-icon-btn" id="prevTurnBtn" onclick="confirmUndoTurn()" title="되돌리기"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 010 11H11"/></svg></button>
         <button class="prog-icon-btn" id="statToggleBtn" onclick="toggleStats()" title="스탯 토글"><img id="statToggleIcon" src="./images/icon/chat-bubble.svg?v=7" alt="스탯" style="width:18px;height:18px"></button>
         <button class="prog-icon-btn" id="dlgEditBtn" onclick="showEditModal()" title="대사 수정"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.15 1.85C10.95 1.05 12.25 1.05 13.05 1.85L14.15 2.95C14.95 3.75 14.95 5.05 14.15 5.85L5.55 14.45C5.35 14.65 5.1 14.75 4.85 14.75H2.25C1.75 14.75 1.35 14.35 1.35 13.85V11.25C1.35 11 1.45 10.75 1.65 10.55L10.15 1.85ZM11.05 2.95C10.75 2.65 10.45 2.65 10.15 2.95L8.95 4.15L11.85 7.05L13.05 5.85C13.35 5.55 13.35 5.25 13.05 4.95L11.05 2.95ZM10.85 8.05L7.95 5.15L2.75 10.35V13.35H5.55L10.85 8.05Z" fill="currentColor" fill-opacity="0.85"/></svg></button>
+        <button class="prog-icon-btn" id="dlgReportBtn" onclick="reportMessage()" title="신고하기" aria-label="신고하기"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></button>
       </div>
     </div>
     <div class="input-wrap">
@@ -2290,6 +2294,7 @@ function sendMessage() {
   // 유저 메시지일 때 TTS 파동 + 편집 연필 + 되돌리기 숨김
   document.getElementById('ttsIndicator').style.display = 'none';
   document.getElementById('dlgEditBtn').style.display = 'none';
+  document.getElementById('dlgReportBtn').style.display = 'none';
   document.getElementById('prevTurnBtn').style.display = 'none';
   const dlgText = document.getElementById('dlgText');
   dlgText.style.color = 'var(--label-normal)';
@@ -2335,6 +2340,7 @@ function sendMessage() {
     // TTS 파동 + 편집 연필 + 되돌리기 다시 표시
     document.getElementById('ttsIndicator').style.display = '';
     document.getElementById('dlgEditBtn').style.display = '';
+    document.getElementById('dlgReportBtn').style.display = '';
     document.getElementById('prevTurnBtn').style.display = '';
     // 로딩 숨기고 진행 라벨 복원
     document.getElementById('progressLoading').style.display = 'none';
@@ -2630,6 +2636,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const editor = document.getElementById('editCodeEditor');
   if (editor) editor.addEventListener('input', highlightCode);
 });
+
+function reportMessage() {
+  // TODO: 신고하기 모달 연결
+  alert('신고 접수되었습니다. 검토 후 조치됩니다.');
+}
 
 function showEditModal() {
   const dlg = DIALOGUES[dlgIndex];
