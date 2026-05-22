@@ -309,6 +309,113 @@ body{
   100%{opacity:0}
 }
 
+/* ═══ TAP COACH MARK (첫 진입 터치 안내) ═══ */
+.tap-coach{
+  position:fixed;inset:0;z-index:9000;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:0;
+  pointer-events:auto;cursor:pointer; /* 터치 게이트 — 첫 탭 흡수 */
+  background:radial-gradient(ellipse 120% 80% at 50% 50%, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.7) 100%);
+  opacity:0;
+  transition:opacity 0.32s cubic-bezier(0.32,0.72,0,1);
+  -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);
+}
+.tap-coach.show{opacity:1}
+.tap-coach[hidden]{display:none}
+.tap-coach-sound{
+  position:absolute;top:max(40px, calc(env(safe-area-inset-top) + 24px));
+  left:50%;transform:translateX(-50%);
+  display:inline-flex;align-items:center;gap:7px;white-space:nowrap;
+  font-size:15px;font-weight:600;color:rgba(255,255,255,0.82);
+  letter-spacing:-0.2px;
+  text-shadow:0 1px 6px rgba(0,0,0,0.5);
+}
+.tap-coach-sound svg{width:16px;height:16px;flex-shrink:0;opacity:0.9}
+.tap-coach-text{
+  font-size:21px;font-weight:500;line-height:1.45;color:#fff;text-align:center;
+  letter-spacing:-0.2px;
+  text-shadow:0 2px 12px rgba(0,0,0,0.6);
+  margin-bottom:36px;
+}
+.tap-coach-text b{color:var(--primary-normal,#14C391);font-weight:600}
+/* 손가락 탭 데모 */
+.tap-coach-demo{
+  position:relative;width:132px;height:132px;
+  display:flex;align-items:center;justify-content:center;
+}
+.tap-coach-ripple,
+.tap-coach-ripple::after{
+  position:absolute;left:50%;top:34%;
+  width:72px;height:72px;border-radius:50%;
+  border:2px solid rgba(255,255,255,0.85);
+  transform:translate(-50%,-50%) scale(0.2);
+  content:'';
+}
+.tap-coach-ripple{animation:coachRipple 1.9s ease-out infinite}
+.tap-coach-ripple::after{animation:coachRipple 1.9s ease-out 0.2s infinite}
+@keyframes coachRipple{
+  0%,17%{transform:translate(-50%,-50%) scale(0.2);opacity:0}
+  22%{opacity:0.8}
+  55%{transform:translate(-50%,-50%) scale(1.5);opacity:0}
+  100%{opacity:0}
+}
+.tap-coach-finger{
+  position:relative;z-index:2;width:62px;height:62px;
+  color:#fff;
+  transform-origin:62% 72%;
+  filter:drop-shadow(0 4px 10px rgba(0,0,0,0.55));
+  animation:coachTap 1.9s ease-in-out infinite;
+}
+@keyframes coachTap{
+  0%{transform:translateY(-20px) scale(1.05)}
+  18%{transform:translateY(0) scale(0.9)}     /* 빠르게 내려와 닿음 + 눌림 */
+  30%{transform:translateY(0) scale(0.9)}     /* 누른 채 유지 (hold) */
+  50%{transform:translateY(-20px) scale(1.05)} /* 천천히 떼기 */
+  100%{transform:translateY(-20px) scale(1.05)}
+}
+/* 좌우 진행 방향 힌트 */
+.tap-coach-zones{
+  display:flex;align-items:center;gap:14px;
+  margin-top:34px;
+}
+.tap-coach-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  height:34px;padding:0 14px;border-radius:999px;
+  background:rgba(255,255,255,0.12);
+  border:1px solid rgba(255,255,255,0.16);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  font-size:13px;font-weight:600;color:rgba(255,255,255,0.92);
+  letter-spacing:-0.1px;
+}
+.tap-coach-chip svg{width:15px;height:15px}
+.tap-coach-chip.next{background:rgba(20,195,145,0.2);border-color:rgba(20,195,145,0.4);color:#fff}
+.tap-coach-dismiss{
+  margin-top:30px;
+  font-size:15px;font-weight:600;color:#fff;
+  letter-spacing:-0.1px;
+  text-shadow:0 1px 6px rgba(0,0,0,0.65);
+  animation:coachBlink 1.3s ease-in-out infinite;
+}
+@keyframes coachBlink{0%,100%{opacity:0.3}50%{opacity:1}}
+@media (prefers-reduced-motion:reduce){
+  .tap-coach-finger{animation:none}
+  .tap-coach-ripple,.tap-coach-ripple::after{animation:none;opacity:0.4}
+  .tap-coach-dismiss{animation:none;opacity:0.7}
+}
+/* 데스크탑 — 코치마크 큼직하게 */
+@media (min-width:769px){
+  .tap-coach-text{font-size:27px;margin-bottom:46px;line-height:1.4}
+  .tap-coach-demo{width:152px;height:152px}
+  .tap-coach-finger{width:74px;height:74px}
+  .tap-coach-ripple,.tap-coach-ripple::after{width:104px;height:104px}
+  .tap-coach-zones{margin-top:44px;gap:16px}
+  .tap-coach-chip{height:40px;font-size:14px;padding:0 16px}
+  .tap-coach-chip svg{width:16px;height:16px}
+  .tap-coach-sound{font-size:16px;gap:8px}
+  .tap-coach-sound svg{width:19px;height:19px}
+  .tap-coach-dismiss{font-size:16px;margin-top:40px}
+}
+
 /* ═══ DIALOGUE TAP ZONES ═══ */
 .dlg-tap-area{position:relative;cursor:pointer;-webkit-user-select:none;user-select:none;min-height:150px;overflow:visible}
 .tap-zone-container{
@@ -638,7 +745,8 @@ body.intro-mode .bottom,
 body.intro-mode .stat-panel{display:none !important}
 
 /* BGM Intro Overlay */
-.bgm-intro{
+.bgm-intro{display:none !important}
+.bgm-intro--unused{
   position:fixed;inset:0;z-index:700;
   background:linear-gradient(180deg,rgba(0,0,0,0.35) 0%,rgba(0,0,0,0.28) 50%,rgba(0,0,0,0.45) 100%);
   display:flex;align-items:center;justify-content:center;
@@ -1179,9 +1287,101 @@ body.intro-mode .stat-panel{display:none !important}
 }
 
 /* (ranking icon now uses .icon-btn) */
+
+/* 캐릭터 화면 우상단 — 앨범 달성율 + 호감도 아이콘 스택 */
+.affinity-stack{
+  position:absolute;
+  top:max(60px, calc(env(safe-area-inset-top) + 54px));
+  right:13px;z-index:46;
+  display:flex;flex-direction:column;align-items:center;gap:11px;
+  transition:opacity 0.25s ease;
+}
+.screen.ui-hidden .affinity-stack{opacity:0;pointer-events:none}
+.aff-item{
+  display:flex;flex-direction:column;align-items:center;gap:1px;
+  background:none;border:none;padding:0;cursor:pointer;
+  transition:transform 0.18s cubic-bezier(0.34,1.56,0.64,1);
+}
+.aff-item:active{transform:scale(0.9)}
+.aff-item[hidden]{display:none}
+.aff-icon{position:relative;width:50px;height:50px;display:block}
+.aff-heart-pct{
+  position:absolute;left:0;right:0;top:48%;transform:translateY(-50%);
+  text-align:center;pointer-events:none;
+  font-family:'Inter','Pretendard JP',sans-serif;
+  font-size:10px;font-weight:800;color:#fff;
+  letter-spacing:-0.4px;
+  text-shadow:0 1px 2px rgba(0,0,0,0.55), 0 0 3px rgba(230,59,156,0.5);
+}
+.aff-svg{width:50px;height:50px;display:block;overflow:visible}
+.aff-svg.album{
+  filter:drop-shadow(0 3px 6px rgba(0,0,0,0.42)) drop-shadow(0 0 5px rgba(60,210,230,0.45));
+  animation:affFloat 3.2s ease-in-out infinite;
+}
+.aff-svg.heart{
+  filter:drop-shadow(0 3px 6px rgba(0,0,0,0.42)) drop-shadow(0 0 5px rgba(255,93,182,0.5));
+  animation:affFloat 3.2s ease-in-out 0.5s infinite;
+}
+@keyframes affFloat{
+  0%,100%{transform:translateY(0) rotate(0deg)}
+  50%{transform:translateY(-2.5px) rotate(-1.8deg)}
+}
+.aff-spark,.aff-spark2{transform-box:fill-box;transform-origin:center}
+.aff-spark{animation:affTwinkle 2s ease-in-out infinite}
+.aff-spark2{animation:affTwinkle 2s ease-in-out 1s infinite}
+@keyframes affTwinkle{
+  0%,100%{opacity:0.25;transform:scale(0.5)}
+  50%{opacity:1;transform:scale(1)}
+}
+.aff-heart-rise{
+  transform:translateY(12px);
+  animation:affHeartRise 1.5s cubic-bezier(0.34,1.3,0.5,1) 0.3s forwards;
+}
+@keyframes affHeartRise{to{transform:translateY(0)}}
+.aff-wave{
+  animation:affWaveFlow 7s linear infinite;
+}
+@keyframes affWaveFlow{to{transform:translateX(-16px)}}
+.aff-label{
+  display:inline-flex;align-items:center;gap:3px;
+  font-family:'Pretendard JP',sans-serif;
+  font-size:9.5px;font-weight:700;color:#fff;
+  letter-spacing:-0.2px;white-space:nowrap;
+  background:rgba(0,0,0,0.5);padding:2px 8px;border-radius:8px;
+  -webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);
+}
+.aff-label b{font-weight:800;color:#7DEAF0}
+.aff-label.heart b{color:#FF9FD8}
+@media (min-width:769px){
+  /* 뷰포트가 아니라 채팅 컨테이너(696px) 안쪽 경계 기준 */
+  .affinity-stack{right:calc((100% - 696px)/2 + 16px)}
+  .aff-icon,.aff-svg{width:58px;height:58px}
+  .aff-label{font-size:10.5px;padding:2px 9px}
+  .aff-heart-pct{font-size:11.5px}
+}
+@media (min-width:1024px){
+  /* 컨테이너 940px 기준 */
+  .affinity-stack{right:calc((100% - 940px)/2 + 16px)}
+}
+@media (prefers-reduced-motion:reduce){
+  .aff-svg{animation:none}
+  .aff-spark,.aff-spark2{animation:none;opacity:0.7}
+  .aff-heart-rise{animation:none;transform:translateY(0)}
+  .aff-wave{animation:none}
+}
+
+/* 콘텐츠 상세 — 오른쪽 사이드 패널 (데스크탑) */
+.content-detail-frame{
+  position:fixed;top:0;right:0;bottom:0;
+  width:480px;max-width:100vw;height:100vh;
+  border:none;
+  z-index:9999;
+  background:transparent;
+}
+.content-detail-frame[hidden]{display:none}
 </style>
 </head>
-<body class="intro-mode">
+<body>
 <div class="screen" id="app">
   <div class="desktop-blur"></div>
   <div class="top-gradient"></div>
@@ -1199,13 +1399,13 @@ body.intro-mode .stat-panel{display:none !important}
       <button class="icon-btn" onclick="history.back()" aria-label="뒤로가기" style="margin-left:-8px">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:1"><path d="M15 18l-6-6 6-6"/></svg>
       </button>
-      <div class="profile-pill" onclick="location.href='../mirai-home/content-detail.html'">
+      <div class="profile-pill" onclick="openContentDetail()">
         <div class="avatar">
           <img src="./images/char-profile.png" alt="Satoru Gojo">
         </div>
         <span class="char-name">채무 대신 연애로 받겠습니다.</span>
         <div class="profile-pill-divider" aria-hidden="true"></div>
-        <button class="profile-pill-action" type="button" aria-label="댓글" onclick="event.stopPropagation()">
+        <button class="profile-pill-action" type="button" aria-label="댓글" onclick="event.stopPropagation();openContentDetail('comments')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
         </button>
       </div>
@@ -1228,6 +1428,80 @@ body.intro-mode .stat-panel{display:none !important}
     <div class="char-img"></div>
     <div class="char-img-overlay" id="charImgArea" style="background-image:url('./images/char-iseol.png')"></div>
     <div class="char-visual">🗡️</div>
+  </div>
+
+  <div class="affinity-stack" id="affinityStack">
+    <!-- 카메라(앨범) — 임시 숨김 (hidden, 나중 복원용) -->
+    <button class="aff-item" type="button" onclick="openGallery()" aria-label="갤러리 68%" hidden>
+      <span class="aff-icon">
+        <svg class="aff-svg album" viewBox="0 0 28 28" aria-hidden="true">
+          <defs>
+            <linearGradient id="camBody" x1="0.2" y1="0" x2="0.7" y2="1">
+              <stop offset="0%" stop-color="#5AD2EA"/>
+              <stop offset="100%" stop-color="#2E97DE"/>
+            </linearGradient>
+            <radialGradient id="camLens" cx="0.38" cy="0.34" r="0.68">
+              <stop offset="0%" stop-color="#A6F2F7"/>
+              <stop offset="52%" stop-color="#2F80D2"/>
+              <stop offset="100%" stop-color="#163F8C"/>
+            </radialGradient>
+          </defs>
+          <!-- 뷰파인더 돌출 -->
+          <rect x="9.2" y="5.4" width="6.4" height="3.4" rx="1.4" fill="#3FB6DC"/>
+          <!-- 카메라 바디 -->
+          <rect x="3.3" y="7.6" width="21.4" height="15.6" rx="4.2" fill="url(#camBody)"/>
+          <!-- 바디 상단 하이라이트 -->
+          <rect x="5" y="9.1" width="18" height="2.6" rx="1.3" fill="rgba(255,255,255,0.2)"/>
+          <!-- 렌즈 외곽 링 -->
+          <circle cx="14" cy="15.6" r="5.4" fill="rgba(255,255,255,0.28)"/>
+          <circle cx="14" cy="15.6" r="4.5" fill="url(#camLens)"/>
+          <!-- 렌즈 반사 -->
+          <ellipse cx="12.2" cy="13.7" rx="1.7" ry="1.1" fill="rgba(255,255,255,0.85)" transform="rotate(-32 12.2 13.7)"/>
+          <circle cx="15.7" cy="17.4" r="0.75" fill="rgba(255,255,255,0.5)"/>
+          <!-- 셔터 버튼 -->
+          <circle cx="20.6" cy="10.4" r="1.15" fill="#FFE680"/>
+          <!-- 반짝 -->
+          <path class="aff-spark" d="M23.6 2.2l.72 1.85 1.85.72-1.85.72-.72 1.85-.72-1.85-1.85-.72 1.85-.72z" fill="#FFE680"/>
+          <path class="aff-spark2" d="M2.8 12l.5 1.3 1.3.5-1.3.5-.5 1.3-.5-1.3-1.3-.5 1.3-.5z" fill="#FFF0B5"/>
+        </svg>
+      </span>
+      <span class="aff-label">갤러리 <b>68%</b></span>
+    </button>
+    <!-- 앨범 달성율 (하트) -->
+    <button class="aff-item" type="button" onclick="openGallery()" aria-label="앨범 68%">
+      <span class="aff-icon">
+        <svg class="aff-svg heart" viewBox="0 0 28 28" aria-hidden="true">
+          <defs>
+            <linearGradient id="hrtGrad" x1="0.3" y1="1" x2="0.55" y2="0">
+              <stop offset="0%" stop-color="#E63B9C"/>
+              <stop offset="50%" stop-color="#FF5DB6"/>
+              <stop offset="100%" stop-color="#FF9CD7"/>
+            </linearGradient>
+            <radialGradient id="hrtShine" cx="0.32" cy="0.28" r="0.42">
+              <stop offset="0%" stop-color="rgba(255,255,255,0.95)"/>
+              <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+            </radialGradient>
+            <clipPath id="hrtClip"><path d="M14 24.6l-1.7-1.54C6.4 17.85 2.6 14.4 2.6 10.2 2.6 6.78 5.32 4.1 8.7 4.1c1.92 0 3.78.9 5.3 2.42C15.52 5 17.38 4.1 19.3 4.1c3.38 0 6.1 2.68 6.1 6.1 0 4.2-3.8 7.65-9.7 12.86L14 24.6z"/></clipPath>
+          </defs>
+          <!-- 빈 하트 -->
+          <path d="M14 24.6l-1.7-1.54C6.4 17.85 2.6 14.4 2.6 10.2 2.6 6.78 5.32 4.1 8.7 4.1c1.92 0 3.78.9 5.3 2.42C15.52 5 17.38 4.1 19.3 4.1c3.38 0 6.1 2.68 6.1 6.1 0 4.2-3.8 7.65-9.7 12.86L14 24.6z" fill="rgba(108,26,70,0.5)"/>
+          <!-- 게이지 차오름 + 물결 표면 -->
+          <g clip-path="url(#hrtClip)">
+            <g class="aff-heart-rise">
+              <path class="aff-wave" d="M-16 16 q4 -1 8 0 t8 0 t8 0 t8 0 t8 0 t8 0 t8 0 V30 H-16 Z" fill="url(#hrtGrad)"/>
+            </g>
+          </g>
+          <!-- 광택 -->
+          <ellipse cx="9.6" cy="9.4" rx="3.4" ry="2.5" fill="url(#hrtShine)" transform="rotate(-22 9.6 9.4)"/>
+          <!-- 외곽 -->
+          <path d="M14 24.6l-1.7-1.54C6.4 17.85 2.6 14.4 2.6 10.2 2.6 6.78 5.32 4.1 8.7 4.1c1.92 0 3.78.9 5.3 2.42C15.52 5 17.38 4.1 19.3 4.1c3.38 0 6.1 2.68 6.1 6.1 0 4.2-3.8 7.65-9.7 12.86L14 24.6z" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="0.8"/>
+          <!-- 반짝 -->
+          <path class="aff-spark" d="M22 3.6l.72 1.85 1.85.72-1.85.72-.72 1.85-.72-1.85-1.85-.72 1.85-.72z" fill="#FFFFFF"/>
+        </svg>
+        <span class="aff-heart-pct">68%</span>
+      </span>
+      <span class="aff-label heart">앨범</span>
+    </button>
   </div>
 
   <div class="bottom-gradient"></div>
@@ -1348,7 +1622,7 @@ body.intro-mode .stat-panel{display:none !important}
 
 <!-- Toast -->
 <!-- BGM Audio -->
-<audio id="bgmAudio" src="./audio/daily-bgm.mp3" loop preload="auto"></audio>
+<audio id="bgmAudio" src="./audio/daily-bgm.mp3" loop preload="auto" muted></audio>
 
 <!-- BGM Intro Overlay -->
 <div class="bgm-intro" id="bgmIntro" onclick="dismissBgmIntro()">
@@ -1533,16 +1807,16 @@ body.intro-mode .stat-panel{display:none !important}
     <div class="settings-slider-row">
       <div class="settings-slider-head">
         <span class="settings-row-title">배경음악</span>
-        <span class="settings-slider-value" id="bgmVolValue2">50%</span>
+        <span class="settings-slider-value" id="bgmVolValue2">0%</span>
       </div>
-      <input type="range" class="settings-slider" id="bgmVolSlider2" min="0" max="100" value="50">
+      <input type="range" class="settings-slider" id="bgmVolSlider2" min="0" max="100" value="0">
     </div>
     <div class="settings-slider-row">
       <div class="settings-slider-head">
         <span class="settings-row-title">음성 (TTS)</span>
-        <span class="settings-slider-value" id="ttsVolValue2">100%</span>
+        <span class="settings-slider-value" id="ttsVolValue2">0%</span>
       </div>
-      <input type="range" class="settings-slider" id="ttsVolSlider2" min="0" max="100" value="100">
+      <input type="range" class="settings-slider" id="ttsVolSlider2" min="0" max="100" value="0">
     </div>
 
     <div class="settings-section-divider"></div>
@@ -1622,7 +1896,77 @@ body.intro-mode .stat-panel{display:none !important}
   </div>
 </div>
 
+<iframe class="content-detail-frame" id="contentDetailFrame" hidden src="about:blank"></iframe>
+
+<!-- 첫 진입 터치 안내 코치마크 -->
+<div class="tap-coach" id="tapCoach" hidden onclick="dismissTapCoach()">
+  <div class="tap-coach-sound">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+    사운드가 포함된 콘텐츠입니다
+  </div>
+  <div class="tap-coach-text">화면을 <b>탭</b>하면<br>이야기가 이어져요</div>
+  <div class="tap-coach-demo">
+    <span class="tap-coach-ripple"></span>
+    <svg class="tap-coach-finger" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 11.24V7.5C9 6.12 10.12 5 11.5 5S14 6.12 14 7.5v3.74c1.21-.81 2-2.18 2-3.74C16 5.01 13.99 3 11.5 3S7 5.01 7 7.5c0 1.56.79 2.93 2 3.74zm9.84 4.63l-4.54-2.26c-.17-.07-.35-.11-.54-.11H13v-6C13 6.67 12.33 6 11.5 6S10 6.67 10 7.5v10.74l-3.43-.72c-.08-.01-.15-.03-.24-.03-.31 0-.59.13-.79.33l-.79.8 4.94 4.94c.27.27.65.44 1.06.44h6.79c.75 0 1.33-.55 1.44-1.28l.75-5.27c.01-.07.02-.14.02-.2 0-.62-.38-1.16-.92-1.38z"/></svg>
+  </div>
+  <div class="tap-coach-zones">
+    <span class="tap-coach-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>왼쪽 이전</span>
+    <span class="tap-coach-chip next">오른쪽 다음<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
+  </div>
+  <div class="tap-coach-dismiss">아무 곳이나 탭해서 시작</div>
+</div>
+
 <script>
+// ═══ TAP COACH MARK (첫 진입 터치 안내) ═══
+let tapCoachGateDone = false;
+function showTapCoach(){
+  const coach = document.getElementById('tapCoach');
+  if (!coach || !coach.hidden) return;
+  coach.hidden = false;
+  requestAnimationFrame(() => coach.classList.add('show'));
+}
+function dismissTapCoach(){
+  if (tapCoachGateDone) return;
+  tapCoachGateDone = true;
+  const coach = document.getElementById('tapCoach');
+  if (coach){
+    coach.classList.remove('show');
+    setTimeout(() => { coach.hidden = true; }, 320);
+  }
+  // 게이트 통과 — 사용자 제스처로 bgm 재생 + 다이얼로그 시작
+  dismissBgmIntro();
+}
+
+// ═══ CONTENT DETAIL MODAL (데스크탑 iframe / 모바일 페이지 이동) ═══
+function openContentDetail(tab){
+  let url = '../mirai-home/content-detail.html';
+  if (tab) url += '?tab=' + tab;
+  if (window.innerWidth <= 768){
+    location.href = url;
+    return;
+  }
+  const frame = document.getElementById('contentDetailFrame');
+  frame.src = url;
+  frame.hidden = false;
+}
+function openGallery(){
+  const url = '../mirai-gallery/gallery-prototype.html';
+  if (window.innerWidth <= 768){
+    location.href = url;
+    return;
+  }
+  const frame = document.getElementById('contentDetailFrame');
+  frame.src = url;
+  frame.hidden = false;
+}
+window.addEventListener('message', e => {
+  if (e.data && e.data.type === 'cd-close'){
+    const frame = document.getElementById('contentDetailFrame');
+    frame.hidden = true;
+    frame.src = 'about:blank';
+  }
+});
+
 // ═══ MENU DROPDOWN ═══
 
 // ═══ MODEL MENU ═══
@@ -1814,8 +2158,8 @@ function confirmUndoTurn() {
 
 const HAS_BGM = true;
 let bgmIntroShown = false;
-let bgmVolume = 0.5;
-let ttsVolume = 1.0;
+let bgmVolume = 0;
+let ttsVolume = 0;
 function openSettings() {
   const screen = document.getElementById('settingsScreen');
   const btn = document.getElementById('menuToggleBtn');
@@ -1845,7 +2189,16 @@ document.addEventListener('DOMContentLoaded', () => {
     bgmVolume = bgm2.value / 100;
     bgmVal2.textContent = bgm2.value + '%';
     const audio = document.getElementById('bgmAudio');
-    if (audio) audio.volume = bgmVolume;
+    if (audio) {
+      audio.volume = bgmVolume;
+      if (bgmVolume > 0) {
+        audio.muted = false;
+        if (audio.paused && bgmIntroShown) audio.play().catch(() => {});
+      } else {
+        audio.muted = true;
+        audio.pause();
+      }
+    }
     updateSliderFill(bgm2);
   });
   if (tts2) tts2.addEventListener('input', () => {
@@ -1870,17 +2223,18 @@ function dismissBgmIntro() {
   document.body.classList.remove('intro-mode');
   document.getElementById('bgmIntro').classList.add('hide');
   const audio = document.getElementById('bgmAudio');
-  if (audio) {
+  if (audio && bgmVolume > 0) {
+    audio.muted = false;
     audio.volume = bgmVolume;
     audio.play().catch(() => {});
     // TTS 등이 audio session 가로채면 자동 복귀
     audio.addEventListener('pause', () => {
-      if (bgmIntroShown && !audio.ended) {
+      if (bgmIntroShown && bgmVolume > 0 && !audio.ended) {
         setTimeout(() => audio.play().catch(() => {}), 80);
       }
     });
     document.addEventListener('visibilitychange', () => {
-      if (!document.hidden && bgmIntroShown && audio.paused) {
+      if (!document.hidden && bgmIntroShown && bgmVolume > 0 && audio.paused) {
         audio.play().catch(() => {});
       }
     });
@@ -1888,10 +2242,8 @@ function dismissBgmIntro() {
   startDialogueFlow();
 }
 document.addEventListener('DOMContentLoaded', () => {
-  if (!HAS_BGM) {
-    document.getElementById('bgmIntro').classList.add('hide');
-    bgmIntroShown = true;
-  }
+  // 진입 시 코치마크를 터치 게이트로 표시 (다이얼로그/bgm은 첫 터치까지 대기)
+  showTapCoach();
 });
 function insertAsterisk() {
   const input = document.querySelector('.input-field');
