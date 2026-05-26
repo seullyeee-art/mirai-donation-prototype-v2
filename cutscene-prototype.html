@@ -340,33 +340,34 @@ body{
 }
 
 /* ═══ 해제 순간 애니메이션 ═══ */
-.char-area.cutscene-revealing::after{
-  content:'';position:absolute;inset:0;z-index:7;pointer-events:none;
-  background:radial-gradient(ellipse at center 38%, rgba(255,255,255,0.85), transparent 60%);
-  animation:cutsceneFlash 0.9s ease-out;
+/* 자물쇠 뱃지 — 고리만 클릭 열림 */
+.char-area.cutscene-revealing .badge-shackle{
+  transform-origin:16px 11px;
+  transform-box:fill-box;
+  animation:shackleClick 0.35s cubic-bezier(.2,.9,.4,1) forwards;
 }
-@keyframes cutsceneFlash{
-  0%{opacity:0}
-  20%{opacity:1}
-  100%{opacity:0}
+@keyframes shackleClick{
+  0%{transform:rotate(0) translate(0,0)}
+  100%{transform:rotate(-55deg) translate(-1px,-2px)}
 }
+/* 자물쇠 뱃지 전체 — 짧은 딜레이 후 페이드 */
 .char-area.cutscene-revealing .cutscene-profile-lock{
-  animation:lockBurst 0.55s ease-out forwards;
+  animation:badgeFade 0.5s ease-out 0.18s forwards;
 }
-@keyframes lockBurst{
-  0%{transform:scale(1);opacity:1}
-  40%{transform:scale(1.5);opacity:1}
-  100%{transform:scale(2.2);opacity:0}
+@keyframes badgeFade{
+  to{opacity:0;transform:scale(0.9)}
 }
+/* 자물쇠 위치에서 소프트 글로우 halo (블루그린) */
 .char-area.cutscene-revealing .cutscene-lock-icon::after{
-  content:'';position:absolute;inset:-8px;border-radius:50%;
-  border:2px solid rgba(255,255,255,0.85);
-  animation:lockRingPulse 0.7s ease-out forwards;
+  content:'';position:absolute;inset:-14px;border-radius:50%;
+  background:radial-gradient(circle, rgba(20,195,145,0.55), rgba(61,143,245,0.25) 50%, transparent 75%);
+  animation:lockGlow 0.85s ease-out forwards;
   pointer-events:none;
 }
-@keyframes lockRingPulse{
-  0%{transform:scale(0.6);opacity:0.9}
-  100%{transform:scale(2.2);opacity:0}
+@keyframes lockGlow{
+  0%{transform:scale(0.55);opacity:0}
+  30%{opacity:1}
+  100%{transform:scale(2);opacity:0}
 }
 
 /* ═══ BOTTOM GRADIENT ═══ */
@@ -1569,7 +1570,7 @@ body.intro-mode .stat-panel{display:none !important}
         <span class="cutscene-profile-lock">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <rect x="5" y="11" width="14" height="10" rx="2"/>
-            <path d="M8 11V8a4 4 0 0 1 8 0v3"/>
+            <path class="badge-shackle" d="M8 11V8a4 4 0 0 1 8 0v3"/>
           </svg>
         </span>
       </span>
