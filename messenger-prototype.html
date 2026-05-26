@@ -244,6 +244,7 @@ body{
 /* ═══ MESSENGER 모드 — 메시지 피드 ═══ */
 body.messenger-mode{background:#0a0a0c}
 body.messenger-mode .screen{background:transparent !important}
+body.messenger-mode .header{background:transparent !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important}
 body.messenger-mode .char-area,
 body.messenger-mode .name-row-wrap,
 body.messenger-mode .dlg-tap-area,
@@ -293,7 +294,7 @@ body.messenger-mode .desktop-blur{display:none}
 }
 
 /* 내레이션 버블 — 헤더 없는 흐린 그레이 버블 */
-.msg-bubble.msg-narration{
+.msg-char .msg-bubble.msg-narration{
   background:rgba(28,28,30,0.7);
   color:rgba(255,255,255,0.5);
   font-size:14px;
