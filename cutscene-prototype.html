@@ -236,187 +236,64 @@ body{
   .char-img-overlay{background-size:auto 95%;background-position:center center;background-color:transparent}
 }
 
-/* ═══ 컷씬 잠금 오버레이 (시네마틱 카드) ═══ */
+/* ═══ 컷씬 잠금 오버레이 ═══ */
 .char-area .char-img,
 .char-area .char-img-overlay{
-  transition:filter 0.6s ease, transform 0.6s ease;
+  transition:filter 0.5s ease, transform 0.5s ease;
 }
 .char-area.cutscene-locked .char-img,
 .char-area.cutscene-locked .char-img-overlay{
-  filter:blur(32px) brightness(0.42) saturate(0.7);
-  transform:scale(1.08);
-}
-/* 시네마틱 비네트 */
-.char-area.cutscene-locked::before{
-  content:'';position:absolute;inset:0;z-index:3;pointer-events:none;
-  background:
-    radial-gradient(ellipse at center, transparent 28%, rgba(0,0,0,0.55) 95%),
-    linear-gradient(180deg, rgba(0,0,0,0.6) 0%, transparent 18%, transparent 82%, rgba(0,0,0,0.7) 100%);
+  filter:blur(26px) brightness(0.55) saturate(0.85);
+  transform:scale(1.05);
 }
 .cutscene-lock{
-  position:absolute;inset:0;z-index:5;
-  display:flex;align-items:center;justify-content:center;
-  padding:24px 16px;
+  position:absolute;left:50%;top:50%;
+  transform:translate(-50%,-50%);
+  z-index:5;
+  width:min(280px, calc(100% - 48px));
+  display:flex;flex-direction:column;align-items:center;gap:14px;
+  text-align:center;
   opacity:0;pointer-events:none;
   transition:opacity 0.35s ease;
 }
 .char-area.cutscene-locked .cutscene-lock{opacity:1;pointer-events:auto}
-
-/* 카드 본체 */
-.cutscene-card{
-  position:relative;
-  width:min(320px, 100%);
-  padding:24px 22px 22px;
-  border-radius:22px;
-  background:linear-gradient(180deg, rgba(28,30,38,0.72) 0%, rgba(16,18,24,0.78) 100%);
-  border:1px solid rgba(255,255,255,0.09);
-  -webkit-backdrop-filter:blur(30px) saturate(1.6);
-  backdrop-filter:blur(30px) saturate(1.6);
-  box-shadow:
-    0 32px 64px rgba(0,0,0,0.55),
-    0 2px 0 rgba(255,255,255,0.04) inset,
-    0 -40px 80px rgba(20,195,145,0.06) inset;
-  overflow:hidden;
-  transform:translateY(8px) scale(0.97);
-  opacity:0;
-  transition:opacity 0.45s ease, transform 0.55s cubic-bezier(.16,1,.3,1);
+.cutscene-lock-icon{
+  width:56px;height:56px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.18);
+  -webkit-backdrop-filter:blur(20px) saturate(1.2);backdrop-filter:blur(20px) saturate(1.2);
+  box-shadow:0 4px 16px rgba(0,0,0,0.35);
 }
-.char-area.cutscene-locked .cutscene-card{
-  opacity:1;transform:translateY(0) scale(1);
-  transition-delay:0.12s;
+.cutscene-lock-icon svg{width:26px;height:26px;color:#fff;opacity:0.95}
+.cutscene-lock-tag{
+  display:inline-block;padding:4px 10px;border-radius:10px;
+  background:rgba(250,115,227,0.85);
+  font-size:10px;font-weight:700;color:#fff;
+  letter-spacing:0.5px;
 }
-
-/* 시머 (가로 스윕) */
-.cutscene-card::before{
-  content:'';position:absolute;top:0;left:-60%;width:50%;height:100%;
-  background:linear-gradient(110deg,
-    transparent 30%,
-    rgba(255,255,255,0.08) 50%,
-    transparent 70%);
-  pointer-events:none;
-  animation:cutsceneShimmer 5.2s ease-in-out 1.4s infinite;
+.cutscene-lock-title{
+  font-size:17px;font-weight:800;color:#fff;
+  line-height:1.35;
+  text-shadow:0 2px 8px rgba(0,0,0,0.6);
 }
-@keyframes cutsceneShimmer{
-  0%{left:-60%}
-  55%,100%{left:140%}
+.cutscene-lock-desc{
+  font-size:12px;color:rgba(255,255,255,0.78);
+  line-height:1.5;
+  text-shadow:0 1px 4px rgba(0,0,0,0.5);
 }
-
-/* 메타 (태그 행) */
-.cutscene-meta{
-  display:flex;align-items:center;gap:7px;margin-bottom:12px;
-  position:relative;
+.cutscene-lock-btn{
+  margin-top:4px;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  height:48px;padding:0 22px;border-radius:12px;border:none;cursor:pointer;
+  background:linear-gradient(116deg,var(--primary-normal),var(--primary-heavy));
+  color:#fff;font-family:inherit;font-size:15px;font-weight:700;letter-spacing:-0.2px;
+  box-shadow:0 6px 24px rgba(20,195,145,0.4);
+  transition:transform 0.15s ease, box-shadow 0.2s ease;
 }
-.cutscene-tag-scene{
-  display:inline-flex;align-items:center;gap:6px;
-  font-family:'JetBrains Mono','SF Mono','Menlo',monospace;
-  font-size:10px;font-weight:600;letter-spacing:1.4px;
-  color:rgba(255,255,255,0.58);
-  padding:5px 9px 5px 7px;border-radius:6px;
-  background:rgba(255,255,255,0.04);
-  border:1px solid rgba(255,255,255,0.07);
-}
-.cutscene-tag-scene::before{
-  content:'';width:6px;height:6px;border-radius:50%;
-  background:linear-gradient(135deg,#FA73E3,#8B5CF6);
-  box-shadow:0 0 6px rgba(250,115,227,0.6);
-}
-.cutscene-tag-rare{
-  display:inline-flex;align-items:center;gap:4px;
-  font-size:10px;font-weight:700;letter-spacing:0.5px;
-  color:#FFE0A8;
-  padding:5px 9px;border-radius:6px;
-  background:linear-gradient(135deg, rgba(232,200,122,0.22) 0%, rgba(232,200,122,0.08) 100%);
-  border:1px solid rgba(232,200,122,0.32);
-}
-.cutscene-tag-rare svg{width:10px;height:10px}
-
-/* 타이틀 / 설명 */
-.cutscene-card-title{
-  position:relative;
-  font-size:21px;font-weight:800;color:#fff;
-  line-height:1.28;letter-spacing:-0.5px;
-  margin-bottom:6px;
-}
-.cutscene-card-desc{
-  position:relative;
-  font-size:12.5px;color:rgba(255,255,255,0.6);
-  line-height:1.55;letter-spacing:-0.1px;
-  margin-bottom:16px;
-}
-
-/* 보상 칩 */
-.cutscene-rewards{
-  position:relative;
-  display:flex;flex-wrap:wrap;gap:6px;
-  margin-bottom:18px;
-}
-.cutscene-reward{
-  display:inline-flex;align-items:center;gap:5px;
-  font-size:11px;font-weight:600;
-  color:rgba(255,255,255,0.78);letter-spacing:-0.1px;
-  padding:6px 10px;border-radius:8px;
-  background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.06);
-}
-.cutscene-reward svg{width:11px;height:11px;flex-shrink:0;color:rgba(255,255,255,0.62)}
-.cutscene-reward.heart svg{color:#FF8FB3}
-.cutscene-reward.album svg{color:#90E0FF}
-.cutscene-reward.image svg{color:#FFD580}
-
-/* CTA */
-.cutscene-cta{
-  position:relative;width:100%;height:52px;
-  border:none;border-radius:14px;cursor:pointer;
-  background:linear-gradient(116deg,var(--primary-normal) 0%,var(--primary-heavy) 100%);
-  overflow:hidden;
-  transition:transform 0.15s ease, box-shadow 0.25s ease;
-  box-shadow:
-    0 10px 28px rgba(20,195,145,0.42),
-    0 0 0 1px rgba(255,255,255,0.08) inset,
-    0 1px 0 rgba(255,255,255,0.25) inset;
-  animation:ctaBreathe 2.6s ease-in-out infinite;
-}
-@keyframes ctaBreathe{
-  0%,100%{box-shadow:0 10px 28px rgba(20,195,145,0.38), 0 0 0 1px rgba(255,255,255,0.08) inset, 0 1px 0 rgba(255,255,255,0.25) inset}
-  50%{box-shadow:0 12px 36px rgba(20,195,145,0.6), 0 0 0 1px rgba(255,255,255,0.12) inset, 0 1px 0 rgba(255,255,255,0.3) inset}
-}
-.cutscene-cta::before{
-  content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse at 30% -20%, rgba(255,255,255,0.32), transparent 60%);
-  pointer-events:none;
-}
-.cutscene-cta:active{transform:scale(0.985);animation:none}
-.cutscene-cta-content{
-  position:relative;height:100%;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 16px 0 18px;
-}
-.cutscene-cta-label{
-  display:inline-flex;align-items:center;gap:7px;
-  font-family:inherit;font-size:15px;font-weight:700;color:#fff;
-  letter-spacing:-0.2px;
-}
-.cutscene-cta-label svg{width:14px;height:14px}
-.cutscene-cta-price{
-  display:inline-flex;align-items:center;gap:5px;
-  padding:5px 10px;border-radius:8px;
-  background:rgba(0,0,0,0.26);
-  color:#fff;font-size:13px;font-weight:800;letter-spacing:-0.2px;
-}
-.cutscene-cta-price img{width:14px;height:14px;object-fit:contain}
-
-/* 하단 보조 안내 */
-.cutscene-hint{
-  position:relative;
-  margin-top:12px;text-align:center;
-  font-size:11px;color:rgba(255,255,255,0.45);
-  letter-spacing:-0.1px;
-}
-
-@media (prefers-reduced-motion:reduce){
-  .cutscene-card::before{animation:none;left:140%}
-  .cutscene-cta{animation:none}
-}
+.cutscene-lock-btn:active{transform:scale(0.97);box-shadow:0 3px 12px rgba(20,195,145,0.3)}
+.cutscene-lock-btn img{width:16px;height:16px;object-fit:contain}
+.cutscene-lock-btn .price{font-weight:800}
 
 /* ═══ BOTTOM GRADIENT ═══ */
 .bottom-gradient{
@@ -1613,44 +1490,20 @@ body.intro-mode .stat-panel{display:none !important}
 
     <!-- 컷씬 잠금 오버레이 -->
     <div class="cutscene-lock" id="cutsceneLock">
-      <div class="cutscene-card">
-        <div class="cutscene-meta">
-          <span class="cutscene-tag-scene">SCENE · 03</span>
-          <span class="cutscene-tag-rare">
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.27 5.82 22 7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            RARE
-          </span>
-        </div>
-        <div class="cutscene-card-title">달빛이 어깨에 닿던 밤</div>
-        <div class="cutscene-card-desc">셀린이 처음으로 가면을 내려놓는 순간 — 해금하면 풀 일러스트가 열리고 앨범에 영구 추가됩니다.</div>
-        <div class="cutscene-rewards">
-          <span class="cutscene-reward image">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
-            풀 일러스트
-          </span>
-          <span class="cutscene-reward album">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h12a2 2 0 0 1 2 2v14l-4-2-4 2-4-2-2 2V4z"/></svg>
-            앨범 영구 추가
-          </span>
-          <span class="cutscene-reward heart">
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-            +5 호감도
-          </span>
-        </div>
-        <button class="cutscene-cta" type="button" onclick="confirmCutsceneUnlock()">
-          <span class="cutscene-cta-content">
-            <span class="cutscene-cta-label">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 11V7a5 5 0 0 0-10 0v4"/><rect x="4" y="11" width="16" height="10" rx="2"/></svg>
-              지금 해금
-            </span>
-            <span class="cutscene-cta-price">
-              <img src="./images/mir.png" alt="" onerror="this.style.display='none'">
-              120
-            </span>
-          </span>
-        </button>
-        <div class="cutscene-hint">호감도 70 달성 시 자동 해금 · 현재 68</div>
-      </div>
+      <span class="cutscene-lock-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="4" y="11" width="16" height="10" rx="2"/>
+          <path d="M8 11V8a4 4 0 0 1 8 0v3"/>
+        </svg>
+      </span>
+      <span class="cutscene-lock-tag">CUTSCENE</span>
+      <div class="cutscene-lock-title">잠금된 컷씬</div>
+      <div class="cutscene-lock-desc">해금하면 이 장면을 풀 일러스트로 감상하고<br>앨범에 영구 추가됩니다</div>
+      <button class="cutscene-lock-btn" type="button" onclick="confirmCutsceneUnlock()">
+        <img src="./images/mir.png" alt="" onerror="this.style.display='none'">
+        <span class="price">120</span>
+        <span>잠금 해제</span>
+      </button>
     </div>
   </div>
 
