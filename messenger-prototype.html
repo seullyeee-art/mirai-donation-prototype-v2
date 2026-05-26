@@ -246,8 +246,8 @@ body.messenger-mode .header{background:transparent !important;backdrop-filter:no
 body.messenger-mode .char-area,
 body.messenger-mode .name-row-wrap,
 body.messenger-mode .dlg-tap-area,
-body.messenger-mode .tap-zone-container,
-body.messenger-mode .stat-panel{display:flex}
+body.messenger-mode .tap-zone-container{display:none !important}
+/* stat-panel은 show 클래스로 토글되게 — display는 그대로 두고 opacity로 제어 */
 body.messenger-mode .stat-panel:not(.show){opacity:0;pointer-events:none;transform:translateY(-8px)}
 body.messenger-mode .top-gradient{display:none !important}
 
