@@ -1954,7 +1954,10 @@ function dismissTapCoach(){
 // ═══ CONTENT DETAIL MODAL (데스크탑 iframe / 모바일 페이지 이동) ═══
 function openContentDetail(tab){
   let url = '../mirai-home/content-detail.html';
-  if (tab) url += '?tab=' + tab;
+  const params = [];
+  if (tab) params.push('tab=' + tab);
+  params.push('t=' + Date.now());
+  url += '?' + params.join('&');
   if (window.innerWidth <= 768){
     location.href = url;
     return;
