@@ -320,49 +320,24 @@ body{
 }
 
 .cutscene-lock-btn{
-  position:relative;
-  display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  height:48px;padding:0 22px;border-radius:12px;border:none;cursor:pointer;
-  background:linear-gradient(116deg,var(--primary-normal) 0%,var(--primary-heavy) 100%);
-  color:#fff;font-family:inherit;font-size:15px;font-weight:700;letter-spacing:-0.2px;
-  box-shadow:
-    0 10px 26px rgba(20,195,145,0.4),
-    0 1px 0 rgba(255,255,255,0.22) inset;
-  overflow:hidden;
-  transition:transform 0.15s ease, box-shadow 0.25s ease;
-  animation:ctaBreathe 2.4s ease-in-out 0.4s infinite;
+  display:inline-flex;align-items:center;gap:7px;
+  height:38px;padding:0 16px;border-radius:999px;
+  background:rgba(20,195,145,0.22);
+  border:1px solid rgba(20,195,145,0.42);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  color:#fff;font-family:inherit;font-size:14px;font-weight:600;letter-spacing:-0.1px;
+  cursor:pointer;
+  transition:transform 0.15s ease, background 0.2s ease;
 }
-@keyframes ctaBreathe{
-  0%,100%{box-shadow:0 10px 26px rgba(20,195,145,0.38), 0 1px 0 rgba(255,255,255,0.22) inset; transform:scale(1)}
-  50%{box-shadow:0 14px 36px rgba(20,195,145,0.65), 0 1px 0 rgba(255,255,255,0.3) inset; transform:scale(1.025)}
-}
-.cutscene-lock-btn::before{
-  content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse at 30% -20%, rgba(255,255,255,0.28), transparent 60%);
-  pointer-events:none;
-}
-.cutscene-lock-btn::after{
-  content:'';position:absolute;inset:-3px;border-radius:14px;
-  border:1.5px solid var(--primary-normal);
-  opacity:0;pointer-events:none;
-  animation:ctaRipple 2.4s ease-out 0.4s infinite;
-}
-@keyframes ctaRipple{
-  0%{opacity:0.5;transform:scale(1)}
-  100%{opacity:0;transform:scale(1.14)}
-}
-.cutscene-lock-btn:active{transform:scale(0.98);animation:none}
-.cutscene-lock-btn:active::after{animation:none;opacity:0}
-.cutscene-lock-btn img{width:15px;height:15px;object-fit:contain;position:relative}
-.cutscene-lock-btn .price{font-weight:800;position:relative}
-.cutscene-lock-btn .label{position:relative}
+.cutscene-lock-btn:active{transform:scale(0.96);background:rgba(20,195,145,0.34)}
+.cutscene-lock-btn img{width:14px;height:14px;object-fit:contain}
+.cutscene-lock-btn .price{font-weight:700}
 
 @media (prefers-reduced-motion:reduce){
-  .cutscene-lock-icon,
+  .cutscene-lock-icon svg,
+  .cutscene-lock-icon::before,
   .cutscene-lock-icon::after,
-  .cutscene-lock-icon .lock-shackle,
-  .cutscene-lock-btn,
-  .cutscene-lock-btn::after{animation:none !important}
+  .cutscene-lock-icon .lock-shackle{animation:none !important}
 }
 
 /* ═══ BOTTOM GRADIENT ═══ */
