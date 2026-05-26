@@ -243,14 +243,23 @@ body{
 }
 .char-area.cutscene-locked .char-img,
 .char-area.cutscene-locked .char-img-overlay{
-  filter:blur(28px) brightness(0.5) saturate(0.8);
+  filter:blur(34px) brightness(0.4) saturate(0.75);
   transform:scale(1.08);
+}
+.char-area.cutscene-locked .char-img-overlay{
+  opacity:0.55;
 }
 @media (min-width:769px){
   .char-area.cutscene-locked .char-img,
   .char-area.cutscene-locked .char-img-overlay{
-    filter:blur(44px) brightness(0.5) saturate(0.8);
+    filter:blur(70px) brightness(0.35) saturate(0.7);
   }
+  .char-area.cutscene-locked .char-img-overlay{
+    opacity:0.4;
+  }
+}
+.char-area .char-img-overlay{
+  transition:filter 0.35s ease, transform 0.45s ease, opacity 0.35s ease;
 }
 /* 시네마틱 비네트 */
 .char-area.cutscene-locked::before{
