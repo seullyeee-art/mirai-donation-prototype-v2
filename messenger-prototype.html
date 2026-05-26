@@ -339,6 +339,15 @@ body.messenger-mode .desktop-blur{display:none}
 .msg-bubble .narr{color:rgba(255,255,255,0.5)}
 .msg-user .msg-bubble .narr{color:rgba(26,26,28,0.5)}
 
+/* 타이핑 커서 (AI 답장) */
+.msg-cursor{
+  display:inline-block;width:2px;height:1em;
+  background:rgba(255,255,255,0.75);margin-left:2px;
+  vertical-align:text-bottom;
+  animation:msgCursorBlink 0.85s steps(2,start) infinite;
+}
+@keyframes msgCursorBlink{0%,100%{opacity:1}50%{opacity:0}}
+
 /* 타이핑 인디케이터 */
 .msg-bubble.msg-typing{
   display:inline-flex;align-items:center;gap:5px;
@@ -373,14 +382,29 @@ body.messenger-mode .desktop-blur{display:none}
 .msg-action:active{transform:scale(0.94)}
 .msg-action svg{width:13px;height:13px}
 
-/* 답장 제안 힌트 */
-.msg-suggest-hint{
+/* 답장 제안 */
+.msg-suggest-wrap{
   align-self:flex-end;
+  display:flex;flex-direction:column;align-items:flex-end;gap:8px;
+  max-width:78%;margin:6px 0 4px;
+}
+.msg-suggest-hint{
   display:inline-flex;align-items:center;gap:6px;
   font-size:13px;color:rgba(255,255,255,0.78);
-  margin:8px 4px 0;
+  margin:0 4px 4px;
 }
 .msg-suggest-hint svg{width:14px;height:14px;color:rgba(255,255,255,0.6)}
+.msg-suggest{
+  display:block;text-align:left;
+  padding:12px 16px;border-radius:18px;border-bottom-right-radius:6px;
+  border:none;cursor:pointer;
+  background:#e8e2d4;color:#1a1a1c;
+  font-family:inherit;font-size:14.5px;line-height:1.5;letter-spacing:-0.15px;
+  max-width:100%;
+  transition:transform 0.12s ease, opacity 0.12s ease;
+}
+.msg-suggest:hover{transform:translateY(-1px)}
+.msg-suggest:active{transform:scale(0.98);opacity:0.9}
 
 /* 이미지 버블 — 4:5 비율 카드 */
 .msg-img{
@@ -2421,6 +2445,8 @@ document.addEventListener('DOMContentLoaded', () => {
   bgmIntroShown = true;
   document.body.classList.remove('intro-mode');
   renderChatFeed();
+  // 첫 로드 시 답장 제안 노출
+  setTimeout(showSuggestions, 600);
 });
 
 function renderChatFeed() {
@@ -2915,12 +2941,7 @@ function sendMessage() {
   input.value = '';
   input.style.height = 'auto';
 
-  if (document.body.classList.contains('messenger-mode')) {
-    appendUserBubble(text);
-    return;
-  }
-  // 이하는 미연시 모드 (현재 messenger-mode라 도달하지 않음) — 호환용
-  _legacySendDialogue(text);
+  appendUserBubble(text);
 }
 
 function _msgActionsHtml(){
@@ -2954,9 +2975,14 @@ const _AI_REPLIES = [
   {speaker:'Zach', narr:"Zach grins, slow and sharp, eyes locked on yours.", text:"You sure about that?"},
 ];
 
+const _SUGGESTIONS = [
+  "I... I didn't know. None of you ever said anything.",
+  "Don't do this. Not all of you. Not like this.",
+  "Then who picks? Because I can't.",
+];
+
 function scheduleAIReply(){
   const r = _AI_REPLIES[Math.floor(Math.random() * _AI_REPLIES.length)];
-  // 기존 progress-row 로딩 텍스트 사용 ('잠시 기다려주세요....')
   const label = document.querySelector('.progress-label');
   const loading = document.getElementById('progressLoading');
   if (label) label.style.display = 'none';
@@ -2966,14 +2992,44 @@ function scheduleAIReply(){
     if (loading) loading.style.display = 'none';
     if (label) label.style.display = '';
     appendCharBubble(r);
+    setTimeout(showSuggestions, 1400);
   }, 2000);
+}
+
+function showSuggestions(){
+  removeSuggestions();
+  const feed = document.getElementById('chatFeed');
+  if (!feed) return;
+  const wrap = document.createElement('div');
+  wrap.className = 'msg-suggest-wrap';
+  wrap.id = '__suggestWrap';
+  wrap.innerHTML = `
+    <div class="msg-suggest-hint">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z"/></svg>
+      You can reply like this
+    </div>
+    ${_SUGGESTIONS.map(s => `
+      <button class="msg-suggest" onclick="pickSuggestion(this)">${escapeHtml(s)}</button>
+    `).join('')}`;
+  feed.appendChild(wrap);
+  feed.scrollTop = feed.scrollHeight;
+}
+
+function removeSuggestions(){
+  const w = document.getElementById('__suggestWrap');
+  if (w) w.remove();
+}
+
+function pickSuggestion(btn){
+  const text = btn.textContent.trim();
+  removeSuggestions();
+  appendUserBubble(text);
 }
 
 function appendCharBubble(m){
   const feed = document.getElementById('chatFeed');
   if (!feed) return;
   const avatar = KEN_AVATARS[m.speaker] || './images/kennedy-thumb.webp';
-  const narrHtml = m.narr ? `<span class="narr">${escapeHtml(m.narr)} </span>` : '';
   const el = document.createElement('div');
   el.className = 'msg msg-char';
   el.innerHTML = `
@@ -2982,104 +3038,37 @@ function appendCharBubble(m){
         <img class="msg-avatar" src="${avatar}" alt="">
         <span class="msg-name">${escapeHtml(m.speaker)}</span>
       </div>
-      <div class="msg-bubble">${narrHtml}${escapeHtml(m.text)}</div>
-      ${_msgActionsHtml()}
+      <div class="msg-bubble"><span class="msg-typed"></span><span class="msg-cursor"></span></div>
     </div>`;
   feed.appendChild(el);
-  setTimeout(() => { feed.scrollTop = feed.scrollHeight; }, 0);
-}
+  feed.scrollTop = feed.scrollHeight;
 
-function _legacySendDialogue(text) {
-  text = text || '(메시지 전송)';
-
-  // 선택지 숨기고 대사 영역 복원
-  const choiceCards = document.getElementById('choiceCards');
-  if (choiceCards) choiceCards.style.display = 'none';
-  const dlgTapArea = document.getElementById('dlgTapArea');
-  dlgTapArea.style.display = '';
-  choicesVisible = false;
-  document.getElementById('app').classList.remove('choices-open');
-  const toggleBtn = document.getElementById('choiceToggleBtn');
-  if (toggleBtn) toggleBtn.classList.remove('active');
-
-  // 로딩 중 인풋 숨기기
-  document.querySelector('.input-wrap').style.display = 'none';
-
-  // 이름 표시
-  const nameRow = document.querySelector('.name-row');
-  nameRow.style.opacity = '1';
-  document.querySelector('.name-row-wrap').style.display = '';
-
-  // 대사 영역: 유저 메시지 표시 + 타이핑 애니메이션
-  const nameText = document.querySelector('.name-text');
-  nameText.textContent = '최고의찐빵';
-  nameText.classList.add('user-name');
-  // 유저 메시지일 때 TTS 파동 + 편집 연필 + 되돌리기 숨김
-  document.getElementById('ttsIndicator').style.display = 'none';
-  document.getElementById('dlgEditBtn').style.display = 'none';
-  document.getElementById('dlgReportBtn').style.display = 'none';
-  document.getElementById('prevTurnBtn').style.display = 'none';
-  const dlgText = document.getElementById('dlgText');
-  dlgText.style.color = 'var(--label-normal)';
-  if (window._typingTimer) clearInterval(window._typingTimer);
-  let uCharIdx = 0;
-  dlgText.innerHTML = '<span class="typing-cursor"></span>';
-
-  // progress-row: 진행 라벨 숨기고 로딩 즉시 표시 (타이핑과 동시)
-  document.querySelector('.progress-label').style.display = 'none';
-  document.getElementById('progressLoading').style.display = 'flex';
-  // 유저 대사 중 탭 유도 리플 숨김
-  const ripple = document.getElementById('tapHintRipple');
-  if (ripple) ripple.classList.remove('show');
-
-  window._typingTimer = setInterval(() => {
-    if (uCharIdx >= text.length) {
-      clearInterval(window._typingTimer);
-      dlgText.innerHTML = '<div class="ln">' + text + '</div>';
-      // 타이핑 완료 후 3초 더 대기 → AI 응답
-      setTimeout(_runAIResponse, 3000);
+  // 타이핑 애니메이션
+  const stackEl = el.querySelector('.msg-stack');
+  const typedEl = el.querySelector('.msg-typed');
+  const cursorEl = el.querySelector('.msg-cursor');
+  const narrPart = m.narr || '';
+  const textPart = m.text || '';
+  const fullChars = narrPart + (narrPart ? ' ' : '') + textPart;
+  const narrLen = narrPart ? narrPart.length + 1 : 0;
+  let i = 0;
+  const tick = setInterval(() => {
+    if (i >= fullChars.length) {
+      clearInterval(tick);
+      cursorEl.remove();
+      // 타이핑 끝난 뒤 액션 아이콘 노출
+      stackEl.insertAdjacentHTML('beforeend', _msgActionsHtml());
       return;
     }
-    dlgText.innerHTML = '<div class="ln">' + text.substring(0, uCharIdx + 1) + '<span class="typing-cursor"></span></div>';
-    uCharIdx++;
-  }, 30);
-
-  // AI 응답 처리 (타이핑 완료 후 3초 뒤 실행)
-  function _runAIResponse() {
-    dlgIndex = 0;
-    inputShown = false;
-    const newDialogues = [
-      {type:'dialogue', lines:['"흥, 또 네가 왔군."', '"...뭐, 싫지는 않아."']},
-      {type:'narration', lines:['셀린은 살짝 고개를 돌렸지만,', '입꼬리가 미세하게 올라갔다.']},
-      {type:'dialogue', lines:['"다음엔 좀 더 재미있는 이야기를 해줘."', '"지루한 건 딱 질색이거든."']},
-    ];
-    DIALOGUES.length = 0;
-    newDialogues.forEach(d => DIALOGUES.push(d));
-    seenDialogues.clear();
-    // 이름 원복 (유저 → 셀린)
-    const nt = document.querySelector('.name-text');
-    nt.textContent = '셀린';
-    nt.classList.remove('user-name');
-    // TTS 파동 + 편집 연필 + 되돌리기 다시 표시
-    document.getElementById('ttsIndicator').style.display = '';
-    document.getElementById('dlgEditBtn').style.display = '';
-    document.getElementById('dlgReportBtn').style.display = '';
-    document.getElementById('prevTurnBtn').style.display = '';
-    // 로딩 숨기고 진행 라벨 복원
-    document.getElementById('progressLoading').style.display = 'none';
-    document.querySelector('.progress-label').style.display = '';
-    document.getElementById('dlgTapArea').style.display = '';
-    document.querySelector('.name-row-wrap').style.display = '';
-    document.querySelector('.name-row').style.opacity = '1';
-    document.querySelector('.input-wrap').style.display = 'none';
-    // 선택지 선택 상태 + 인풋 + 버튼 리셋
-    document.querySelectorAll('.choice-card').forEach(c => c.classList.remove('selected'));
-    document.querySelector('.input-field').value = '';
-    const pb = document.getElementById('prevTurnBtn');
-    if (pb) pb.disabled = true;
-    document.getElementById('continueTurnBtn').disabled = true;
-    showDialogue(0);
-  }
+    i++;
+    const shown = fullChars.slice(0, i);
+    if (narrLen > 0 && i <= narrLen) {
+      typedEl.innerHTML = `<span class="narr">${escapeHtml(shown)}</span>`;
+    } else {
+      typedEl.innerHTML = `<span class="narr">${escapeHtml(narrPart)} </span>${escapeHtml(shown.slice(narrLen))}`;
+    }
+    feed.scrollTop = feed.scrollHeight;
+  }, 22);
 }
 
 function showToast(msg) {
