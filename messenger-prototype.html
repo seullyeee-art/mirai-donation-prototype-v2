@@ -2906,20 +2906,57 @@ function sendMessage() {
   _legacySendDialogue(text);
 }
 
-function appendUserBubble(text) {
-  const feed = document.getElementById('chatFeed');
-  if (!feed) return;
-  const actionsHtml = `
+function _msgActionsHtml(){
+  return `
     <div class="msg-actions">
       <button class="msg-action" title="대사 수정" onclick="showToast('대사 수정')"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.15 1.85C10.95 1.05 12.25 1.05 13.05 1.85L14.15 2.95C14.95 3.75 14.95 5.05 14.15 5.85L5.55 14.45C5.35 14.65 5.1 14.75 4.85 14.75H2.25C1.75 14.75 1.35 14.35 1.35 13.85V11.25C1.35 11 1.45 10.75 1.65 10.55L10.15 1.85ZM11.05 2.95C10.75 2.65 10.45 2.65 10.15 2.95L8.95 4.15L11.85 7.05L13.05 5.85C13.35 5.55 13.35 5.25 13.05 4.95L11.05 2.95ZM10.85 8.05L7.95 5.15L2.75 10.35V13.35H5.55L10.85 8.05Z" fill="currentColor" fill-opacity="0.85"/></svg></button>
       <button class="msg-action" title="삭제" onclick="this.closest('.msg').remove()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg></button>
     </div>`;
+}
+
+function appendUserBubble(text) {
+  const feed = document.getElementById('chatFeed');
+  if (!feed) return;
   const el = document.createElement('div');
   el.className = 'msg msg-user';
   el.innerHTML = `
     <div class="msg-stack">
       <div class="msg-bubble">${escapeHtml(text)}</div>
-      ${actionsHtml}
+      ${_msgActionsHtml()}
+    </div>`;
+  feed.appendChild(el);
+  setTimeout(() => { feed.scrollTop = feed.scrollHeight; }, 0);
+  scheduleAIReply();
+}
+
+const _AI_REPLIES = [
+  {speaker:'Cash', narr:"Cash steps closer, the heat of him filling the space between you.", text:"Take your time. We're not going anywhere."},
+  {speaker:'Liam', narr:"Liam tilts his head, eyes thoughtful behind the rim of his glass.", text:"That's not an answer. Try again."},
+  {speaker:'Noah', narr:"Noah lets out a low laugh, no humor in it.", text:"Oh, this just got interesting."},
+  {speaker:'Theo', narr:"Theo's gaze doesn't waver. He hasn't blinked in a while.", text:"Say it again. I want to hear it twice."},
+  {speaker:'Zach', narr:"Zach grins, slow and sharp, eyes locked on yours.", text:"You sure about that?"},
+];
+
+function scheduleAIReply(){
+  const r = _AI_REPLIES[Math.floor(Math.random() * _AI_REPLIES.length)];
+  setTimeout(() => appendCharBubble(r), 900);
+}
+
+function appendCharBubble(m){
+  const feed = document.getElementById('chatFeed');
+  if (!feed) return;
+  const avatar = KEN_AVATARS[m.speaker] || './images/kennedy-thumb.webp';
+  const narrHtml = m.narr ? `<span class="narr">${escapeHtml(m.narr)} </span>` : '';
+  const el = document.createElement('div');
+  el.className = 'msg msg-char';
+  el.innerHTML = `
+    <div class="msg-stack">
+      <div class="msg-header">
+        <img class="msg-avatar" src="${avatar}" alt="">
+        <span class="msg-name">${escapeHtml(m.speaker)}</span>
+      </div>
+      <div class="msg-bubble">${narrHtml}${escapeHtml(m.text)}</div>
+      ${_msgActionsHtml()}
     </div>`;
   feed.appendChild(el);
   setTimeout(() => { feed.scrollTop = feed.scrollHeight; }, 0);
