@@ -237,31 +237,19 @@ body{
 }
 
 /* ═══ 컷씬 잠금 오버레이 ═══ */
-.char-area .char-img,
+/* 캐릭터 오버레이는 사전 블러된 파일로 스왑 (CSS 블러 X) — 스왑 시 페이드 */
 .char-area .char-img-overlay{
+  transition:opacity 0.45s ease;
+}
+/* 배경(bg-scene)에만 살짝 블러 — 분위기용 */
+.char-area .char-img{
   transition:filter 0.35s ease, transform 0.45s ease;
 }
-.char-area.cutscene-locked .char-img,
-.char-area.cutscene-locked .char-img-overlay{
-  filter:blur(34px) brightness(0.4) saturate(0.75);
-  transform:scale(1.08);
+.char-area.cutscene-locked .char-img{
+  filter:blur(12px) brightness(0.6);
+  transform:scale(1.04);
 }
-.char-area.cutscene-locked .char-img-overlay{
-  opacity:0.55;
-}
-@media (min-width:769px){
-  .char-area.cutscene-locked .char-img,
-  .char-area.cutscene-locked .char-img-overlay{
-    filter:blur(70px) brightness(0.35) saturate(0.7);
-  }
-  .char-area.cutscene-locked .char-img-overlay{
-    opacity:0.4;
-  }
-}
-.char-area .char-img-overlay{
-  transition:filter 0.35s ease, transform 0.45s ease, opacity 0.35s ease;
-}
-/* 시네마틱 비네트 */
+/* 시네마틱 비네트 (잠금 상태에서만) */
 .char-area.cutscene-locked::before{
   content:'';position:absolute;inset:0;z-index:3;pointer-events:none;
   background:radial-gradient(ellipse at center, transparent 32%, rgba(0,0,0,0.55) 100%);
@@ -2231,24 +2219,32 @@ function confirmUndoTurn() {
 
 let cutsceneUnlocked = false;
 const BASE_IMG = "url('./images/iseol-base.webp')";
+const LOCKED_IMG = "url('./images/iseol-cutscene-locked.webp')";
 const CUTSCENE_IMG = "url('./images/iseol-cutscene.webp')";
+function swapOverlay(img) {
+  const overlay = document.getElementById('charImgArea');
+  if (!overlay) return;
+  if (overlay.style.backgroundImage === img) return;
+  overlay.style.opacity = '0';
+  setTimeout(() => {
+    overlay.style.backgroundImage = img;
+    overlay.style.opacity = '1';
+  }, 220);
+}
 function applyCutsceneState(idx) {
   const area = document.getElementById('charArea');
-  const overlay = document.getElementById('charImgArea');
-  if (!area || !overlay) return;
+  if (!area) return;
   if (cutsceneUnlocked) {
     area.classList.remove('cutscene-locked');
-    overlay.style.backgroundImage = CUTSCENE_IMG;
+    swapOverlay(CUTSCENE_IMG);
     return;
   }
   if (idx >= 1) {
-    // 두 번째 대사부터 컷씬 잠금 (블러 처리된 컷씬 일러스트 미리보기)
     area.classList.add('cutscene-locked');
-    overlay.style.backgroundImage = CUTSCENE_IMG;
+    swapOverlay(LOCKED_IMG);
   } else {
-    // 첫 대사 — 기본 이미지
     area.classList.remove('cutscene-locked');
-    overlay.style.backgroundImage = BASE_IMG;
+    swapOverlay(BASE_IMG);
   }
 }
 function confirmCutsceneUnlock() {
@@ -2256,8 +2252,7 @@ function confirmCutsceneUnlock() {
     cutsceneUnlocked = true;
     const area = document.getElementById('charArea');
     if (area) area.classList.remove('cutscene-locked');
-    const overlay = document.getElementById('charImgArea');
-    if (overlay) overlay.style.backgroundImage = CUTSCENE_IMG;
+    swapOverlay(CUTSCENE_IMG);
     showToast('컷씬을 해금했어요');
   });
 }
