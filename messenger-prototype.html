@@ -139,10 +139,11 @@ body{
 .profile-pill .avatar{
   width:24px;height:24px;border-radius:50%;flex-shrink:0;
   position:relative;overflow:hidden;
+  background:none !important;
+  border:none !important;
   box-shadow:inset 0 0 0 1px rgba(0,0,0,0.45);
 }
 .profile-pill .avatar img{width:100%;height:100%;object-fit:cover;display:block}
-.profile-pill .avatar img{width:100%;height:100%;object-fit:cover}
 .profile-pill .char-name{
   font-size:12px;color:var(--label-strong);letter-spacing:0.3px;
   max-width:80px;
@@ -290,9 +291,9 @@ body.messenger-mode .desktop-blur{display:none}
   margin:12px 0;
 }
 
-/* 내레이션 버블 — 헤더 없는 흐린 그레이 버블 */
+/* 내레이션 버블 — 헤더 없는 흐린 그레이 텍스트 (bg는 동일 솔리드) */
 .msg-char .msg-bubble.msg-narration{
-  background:rgba(28,28,30,0.7);
+  background:#1c1c1e;
   color:rgba(255,255,255,0.5);
   font-size:14px;
 }
@@ -2401,7 +2402,7 @@ function renderChatFeed() {
   const actionsHtml = `
     <div class="msg-actions">
       <button class="msg-action" title="대사 수정" onclick="showToast('대사 수정')"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.15 1.85C10.95 1.05 12.25 1.05 13.05 1.85L14.15 2.95C14.95 3.75 14.95 5.05 14.15 5.85L5.55 14.45C5.35 14.65 5.1 14.75 4.85 14.75H2.25C1.75 14.75 1.35 14.35 1.35 13.85V11.25C1.35 11 1.45 10.75 1.65 10.55L10.15 1.85ZM11.05 2.95C10.75 2.65 10.45 2.65 10.15 2.95L8.95 4.15L11.85 7.05L13.05 5.85C13.35 5.55 13.35 5.25 13.05 4.95L11.05 2.95ZM10.85 8.05L7.95 5.15L2.75 10.35V13.35H5.55L10.85 8.05Z" fill="currentColor" fill-opacity="0.85"/></svg></button>
-      <button class="msg-action" title="신고하기" onclick="showToast('신고')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18a7 7 0 0 1 14 0"/><line x1="3" y1="18" x2="21" y2="18"/><line x1="12" y1="9" x2="12" y2="2"/><line x1="6" y1="6" x2="7" y2="7"/><line x1="18" y1="6" x2="17" y2="7"/></svg></button>
+      <button class="msg-action" title="삭제" onclick="this.closest('.msg').remove()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg></button>
     </div>`;
 
   MESSAGES.forEach((m) => {
@@ -2411,6 +2412,7 @@ function renderChatFeed() {
       el.innerHTML = `
         <div class="msg-stack">
           <div class="msg-bubble msg-narration">${escapeHtml(m.text)}</div>
+          ${actionsHtml}
         </div>`;
       feed.appendChild(el);
       return;
@@ -2886,11 +2888,17 @@ function sendMessage() {
 function appendUserBubble(text) {
   const feed = document.getElementById('chatFeed');
   if (!feed) return;
+  const actionsHtml = `
+    <div class="msg-actions">
+      <button class="msg-action" title="대사 수정" onclick="showToast('대사 수정')"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.15 1.85C10.95 1.05 12.25 1.05 13.05 1.85L14.15 2.95C14.95 3.75 14.95 5.05 14.15 5.85L5.55 14.45C5.35 14.65 5.1 14.75 4.85 14.75H2.25C1.75 14.75 1.35 14.35 1.35 13.85V11.25C1.35 11 1.45 10.75 1.65 10.55L10.15 1.85ZM11.05 2.95C10.75 2.65 10.45 2.65 10.15 2.95L8.95 4.15L11.85 7.05L13.05 5.85C13.35 5.55 13.35 5.25 13.05 4.95L11.05 2.95ZM10.85 8.05L7.95 5.15L2.75 10.35V13.35H5.55L10.85 8.05Z" fill="currentColor" fill-opacity="0.85"/></svg></button>
+      <button class="msg-action" title="삭제" onclick="this.closest('.msg').remove()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg></button>
+    </div>`;
   const el = document.createElement('div');
   el.className = 'msg msg-user';
   el.innerHTML = `
     <div class="msg-stack">
       <div class="msg-bubble">${escapeHtml(text)}</div>
+      ${actionsHtml}
     </div>`;
   feed.appendChild(el);
   setTimeout(() => { feed.scrollTop = feed.scrollHeight; }, 0);
