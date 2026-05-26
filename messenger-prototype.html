@@ -293,13 +293,15 @@ body.messenger-mode .desktop-blur{display:none}
 
 /* 내레이션 버블 — 헤더 없는 흐린 그레이 텍스트 (bg는 동일 솔리드) */
 .msg-char .msg-bubble.msg-narration{
-  background:#1c1c1e;
+  background:rgba(28,28,30,0.9);
   color:rgba(255,255,255,0.5);
   font-size:14px;
 }
 
 /* 메시지 컨테이너 */
 .msg{max-width:520px}
+@media (min-width:769px){.msg{max-width:600px}}
+@media (min-width:1024px){.msg{max-width:720px}}
 .msg-char{align-self:flex-start}
 .msg-user{align-self:flex-end}
 
@@ -326,7 +328,7 @@ body.messenger-mode .desktop-blur{display:none}
 }
 /* 캐릭터 버블 — 다크 그레이 */
 .msg-char .msg-bubble{
-  background:#1c1c1e;color:#fff;
+  background:rgba(28,28,30,0.9);color:#fff;
 }
 /* 답장 제안 / 유저 — 크림 */
 .msg-user .msg-bubble{
@@ -367,7 +369,7 @@ body.messenger-mode .desktop-blur{display:none}
   position:relative;width:200px;max-width:100%;
   aspect-ratio:4/5;
   border-radius:14px;overflow:hidden;
-  background:#1c1c1e;
+  background:rgba(28,28,30,0.9);
 }
 .msg-img img{display:block;width:100%;height:100%;object-fit:cover;object-position:center top}
 
