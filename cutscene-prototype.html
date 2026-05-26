@@ -239,61 +239,96 @@ body{
 /* ═══ 컷씬 잠금 오버레이 ═══ */
 .char-area .char-img,
 .char-area .char-img-overlay{
-  transition:filter 0.5s ease, transform 0.5s ease;
+  transition:filter 0.6s ease, transform 0.6s ease;
 }
 .char-area.cutscene-locked .char-img,
 .char-area.cutscene-locked .char-img-overlay{
-  filter:blur(26px) brightness(0.55) saturate(0.85);
-  transform:scale(1.05);
+  filter:blur(30px) brightness(0.45) saturate(0.75);
+  transform:scale(1.08);
 }
+/* 시네마틱 비네트 */
+.char-area.cutscene-locked::before{
+  content:'';position:absolute;inset:0;z-index:3;pointer-events:none;
+  background:radial-gradient(ellipse at center, transparent 32%, rgba(0,0,0,0.55) 100%);
+}
+
 .cutscene-lock{
-  position:absolute;left:50%;top:50%;
-  transform:translate(-50%,-50%);
-  z-index:5;
-  width:min(280px, calc(100% - 48px));
-  display:flex;flex-direction:column;align-items:center;gap:14px;
-  text-align:center;
+  position:absolute;inset:0;z-index:5;
+  display:flex;align-items:center;justify-content:center;
+  padding:24px 16px;
   opacity:0;pointer-events:none;
   transition:opacity 0.35s ease;
 }
 .char-area.cutscene-locked .cutscene-lock{opacity:1;pointer-events:auto}
-.cutscene-lock-icon{
-  width:56px;height:56px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  background:rgba(255,255,255,0.08);
-  border:1px solid rgba(255,255,255,0.18);
-  -webkit-backdrop-filter:blur(20px) saturate(1.2);backdrop-filter:blur(20px) saturate(1.2);
-  box-shadow:0 4px 16px rgba(0,0,0,0.35);
+
+.cutscene-card{
+  position:relative;
+  width:min(300px, 100%);
+  padding:26px 22px 20px;
+  border-radius:20px;
+  background:linear-gradient(180deg, rgba(28,30,38,0.72) 0%, rgba(16,18,24,0.78) 100%);
+  border:1px solid rgba(255,255,255,0.09);
+  -webkit-backdrop-filter:blur(28px) saturate(1.5);
+  backdrop-filter:blur(28px) saturate(1.5);
+  box-shadow:
+    0 28px 60px rgba(0,0,0,0.55),
+    0 1px 0 rgba(255,255,255,0.05) inset;
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+  transform:translateY(8px) scale(0.97);opacity:0;
+  transition:opacity 0.45s ease, transform 0.55s cubic-bezier(.16,1,.3,1);
 }
-.cutscene-lock-icon svg{width:26px;height:26px;color:#fff;opacity:0.95}
+.char-area.cutscene-locked .cutscene-card{
+  opacity:1;transform:translateY(0) scale(1);transition-delay:0.12s;
+}
+
+.cutscene-lock-icon{
+  width:48px;height:48px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg, rgba(250,115,227,0.18), rgba(139,92,246,0.18));
+  border:1px solid rgba(250,115,227,0.28);
+  box-shadow:0 6px 18px rgba(250,115,227,0.18);
+  margin-bottom:12px;
+}
+.cutscene-lock-icon svg{width:22px;height:22px;color:#fff;opacity:0.95}
+
 .cutscene-lock-tag{
-  display:inline-block;padding:4px 10px;border-radius:10px;
+  display:inline-block;padding:4px 10px;border-radius:6px;
   background:rgba(250,115,227,0.85);
-  font-size:10px;font-weight:700;color:#fff;
-  letter-spacing:0.5px;
+  font-size:10px;font-weight:700;color:#fff;letter-spacing:0.8px;
+  margin-bottom:10px;
 }
 .cutscene-lock-title{
-  font-size:17px;font-weight:800;color:#fff;
-  line-height:1.35;
-  text-shadow:0 2px 8px rgba(0,0,0,0.6);
+  font-size:18px;font-weight:800;color:#fff;
+  line-height:1.3;letter-spacing:-0.4px;
+  margin-bottom:8px;
 }
 .cutscene-lock-desc{
-  font-size:12px;color:rgba(255,255,255,0.78);
-  line-height:1.5;
-  text-shadow:0 1px 4px rgba(0,0,0,0.5);
+  font-size:12.5px;color:rgba(255,255,255,0.62);
+  line-height:1.55;letter-spacing:-0.1px;
+  margin-bottom:18px;
 }
+
 .cutscene-lock-btn{
-  margin-top:4px;
-  display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  height:48px;padding:0 22px;border-radius:12px;border:none;cursor:pointer;
-  background:linear-gradient(116deg,var(--primary-normal),var(--primary-heavy));
+  position:relative;width:100%;height:48px;
+  border:none;border-radius:12px;cursor:pointer;
+  background:linear-gradient(116deg,var(--primary-normal) 0%,var(--primary-heavy) 100%);
   color:#fff;font-family:inherit;font-size:15px;font-weight:700;letter-spacing:-0.2px;
-  box-shadow:0 6px 24px rgba(20,195,145,0.4);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  box-shadow:
+    0 10px 26px rgba(20,195,145,0.4),
+    0 1px 0 rgba(255,255,255,0.22) inset;
+  overflow:hidden;
   transition:transform 0.15s ease, box-shadow 0.2s ease;
 }
-.cutscene-lock-btn:active{transform:scale(0.97);box-shadow:0 3px 12px rgba(20,195,145,0.3)}
-.cutscene-lock-btn img{width:16px;height:16px;object-fit:contain}
-.cutscene-lock-btn .price{font-weight:800}
+.cutscene-lock-btn::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 30% -20%, rgba(255,255,255,0.28), transparent 60%);
+  pointer-events:none;
+}
+.cutscene-lock-btn:active{transform:scale(0.98);box-shadow:0 4px 14px rgba(20,195,145,0.3)}
+.cutscene-lock-btn img{width:15px;height:15px;object-fit:contain;position:relative}
+.cutscene-lock-btn .price{font-weight:800;position:relative}
+.cutscene-lock-btn .label{position:relative}
 
 /* ═══ BOTTOM GRADIENT ═══ */
 .bottom-gradient{
@@ -1490,20 +1525,22 @@ body.intro-mode .stat-panel{display:none !important}
 
     <!-- 컷씬 잠금 오버레이 -->
     <div class="cutscene-lock" id="cutsceneLock">
-      <span class="cutscene-lock-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <rect x="4" y="11" width="16" height="10" rx="2"/>
-          <path d="M8 11V8a4 4 0 0 1 8 0v3"/>
-        </svg>
-      </span>
-      <span class="cutscene-lock-tag">CUTSCENE</span>
-      <div class="cutscene-lock-title">잠금된 컷씬</div>
-      <div class="cutscene-lock-desc">해금하면 이 장면을 풀 일러스트로 감상하고<br>앨범에 영구 추가됩니다</div>
-      <button class="cutscene-lock-btn" type="button" onclick="confirmCutsceneUnlock()">
-        <img src="./images/mir.png" alt="" onerror="this.style.display='none'">
-        <span class="price">120</span>
-        <span>잠금 해제</span>
-      </button>
+      <div class="cutscene-card">
+        <span class="cutscene-lock-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="4" y="11" width="16" height="10" rx="2"/>
+            <path d="M8 11V8a4 4 0 0 1 8 0v3"/>
+          </svg>
+        </span>
+        <span class="cutscene-lock-tag">CUTSCENE</span>
+        <div class="cutscene-lock-title">잠금된 컷씬</div>
+        <div class="cutscene-lock-desc">해금하면 이 장면을 풀 일러스트로 감상하고<br>앨범에 영구 추가됩니다</div>
+        <button class="cutscene-lock-btn" type="button" onclick="confirmCutsceneUnlock()">
+          <img src="./images/mir.png" alt="" onerror="this.style.display='none'">
+          <span class="price">120</span>
+          <span class="label">잠금 해제</span>
+        </button>
+      </div>
     </div>
   </div>
 
