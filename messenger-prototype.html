@@ -269,11 +269,11 @@ body.messenger-mode .desktop-blur{display:none}
 
 .chat-feed{
   position:absolute;left:0;right:0;
-  top:max(56px, env(safe-area-inset-top));
-  bottom:0;
+  top:0;bottom:0;
   z-index:1;
   overflow-y:auto;-webkit-overflow-scrolling:touch;
-  padding:24px 16px 220px;
+  /* 헤더 뒤로 스크롤 가능하게 — 첫 메시지가 헤더에 안 가리게 상단 패딩 */
+  padding:max(72px, calc(env(safe-area-inset-top) + 64px)) 16px 220px;
   display:flex;flex-direction:column;gap:12px;
   scrollbar-width:none;
 }
@@ -282,7 +282,7 @@ body.messenger-mode .desktop-blur{display:none}
   .chat-feed{padding-left:24px;padding-right:24px}
 }
 @media (min-width:769px){
-  .chat-feed{max-width:696px;margin:0 auto;left:0;right:0;padding-top:32px}
+  .chat-feed{max-width:696px;margin:0 auto;left:0;right:0}
 }
 
 /* 시간 헤더 */
