@@ -1305,6 +1305,18 @@ body.intro-mode .stat-panel{display:none !important}
 .aff-item:active{transform:scale(0.9)}
 .aff-item[hidden]{display:none}
 .aff-icon{position:relative;width:50px;height:50px;display:block}
+.aff-new-dot{
+  position:absolute;top:2px;right:6px;
+  width:9px;height:9px;border-radius:50%;
+  background:#2EC4F0;
+  box-shadow:0 1px 3px rgba(0,0,0,0.55), 0 0 7px rgba(46,196,240,0.85);
+  pointer-events:none;
+  animation:affDotPulse 1.6s ease-in-out infinite;
+}
+@keyframes affDotPulse{
+  0%,100%{transform:scale(1);box-shadow:0 1px 3px rgba(0,0,0,0.55), 0 0 7px rgba(46,196,240,0.7)}
+  50%{transform:scale(1.22);box-shadow:0 1px 3px rgba(0,0,0,0.55), 0 0 12px rgba(46,196,240,1)}
+}
 .aff-heart-pct{
   position:absolute;left:0;right:0;top:48%;transform:translateY(-50%);
   text-align:center;pointer-events:none;
@@ -1368,6 +1380,7 @@ body.intro-mode .stat-panel{display:none !important}
   .aff-spark,.aff-spark2{animation:none;opacity:0.7}
   .aff-heart-rise{animation:none;transform:translateY(0)}
   .aff-wave{animation:none}
+  .aff-new-dot{animation:none}
 }
 
 /* 콘텐츠 상세 — 오른쪽 사이드 패널 (데스크탑) */
@@ -1458,6 +1471,7 @@ body.intro-mode .stat-panel{display:none !important}
           <path class="aff-spark" d="M22 3.6l.72 1.85 1.85.72-1.85.72-.72 1.85-.72-1.85-1.85-.72 1.85-.72z" fill="#FFFFFF"/>
         </svg>
         <span class="aff-heart-pct">68%</span>
+        <span class="aff-new-dot" aria-label="새 이미지"></span>
       </span>
     </button>
   </div>
