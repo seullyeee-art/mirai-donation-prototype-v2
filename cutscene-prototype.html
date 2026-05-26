@@ -1522,9 +1522,9 @@ body.intro-mode .stat-panel{display:none !important}
 📜 진행도: [초기 탐색]</div><div class="stat-handle"></div></div>
 
   <div class="char-area" id="charArea">
-    <!-- 1턴 = bg-scene (전체 씬), 2턴+ = iseol-cutscene (블러+잠금) -->
-    <div class="char-img" id="charImgArea" style="background-image:url('./images/bg-scene.webp')"></div>
-    <div class="char-img-overlay" hidden></div>
+    <!-- bg는 고정, 캐릭터 오버레이만 1턴/컷씬 스왑 -->
+    <div class="char-img" style="background-image:url('./images/bg-scene.webp')"></div>
+    <div class="char-img-overlay" id="charImgArea" style="background-image:url('./images/iseol-base.webp')"></div>
     <div class="char-visual">🗡️</div>
 
     <!-- 컷씬 잠금 오버레이 -->
