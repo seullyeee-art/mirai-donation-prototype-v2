@@ -1524,7 +1524,7 @@ body.intro-mode .stat-panel{display:none !important}
   <div class="char-area" id="charArea">
     <!-- 캐릭터 전신 이미지: ./images/char-iseol.png -->
     <div class="char-img"></div>
-    <div class="char-img-overlay" id="charImgArea" style="background-image:url('./images/char-iseol.png')"></div>
+    <div class="char-img-overlay" id="charImgArea" style="background-image:url('./images/iseol-base.webp')"></div>
     <div class="char-visual">🗡️</div>
 
     <!-- 컷씬 잠금 오버레이 -->
@@ -2215,22 +2215,34 @@ function confirmUndoTurn() {
 }
 
 let cutsceneUnlocked = false;
+const BASE_IMG = "url('./images/iseol-base.webp')";
+const CUTSCENE_IMG = "url('./images/iseol-casual-greet.webp')";
 function applyCutsceneState(idx) {
   const area = document.getElementById('charArea');
-  if (!area) return;
-  if (cutsceneUnlocked) { area.classList.remove('cutscene-locked'); return; }
-  // 첫 대사(0) 일반, 두 번째 대사(1)부터 컷씬 잠금 활성화
-  if (idx >= 1) area.classList.add('cutscene-locked');
-  else area.classList.remove('cutscene-locked');
+  const overlay = document.getElementById('charImgArea');
+  if (!area || !overlay) return;
+  if (cutsceneUnlocked) {
+    area.classList.remove('cutscene-locked');
+    overlay.style.backgroundImage = CUTSCENE_IMG;
+    return;
+  }
+  if (idx >= 1) {
+    // 두 번째 대사부터 컷씬 잠금 (블러 처리된 컷씬 일러스트 미리보기)
+    area.classList.add('cutscene-locked');
+    overlay.style.backgroundImage = CUTSCENE_IMG;
+  } else {
+    // 첫 대사 — 기본 이미지
+    area.classList.remove('cutscene-locked');
+    overlay.style.backgroundImage = BASE_IMG;
+  }
 }
 function confirmCutsceneUnlock() {
   showConfirm('컷씬을 해금하시겠습니까?', '120 미르가 차감되며 앨범에 영구 추가됩니다.', () => {
     cutsceneUnlocked = true;
     const area = document.getElementById('charArea');
     if (area) area.classList.remove('cutscene-locked');
-    // 해제 시 컷씬 이미지로 스왑
     const overlay = document.getElementById('charImgArea');
-    if (overlay) overlay.style.backgroundImage = "url('./images/iseol-casual-greet.webp')";
+    if (overlay) overlay.style.backgroundImage = CUTSCENE_IMG;
     showToast('컷씬을 해금했어요');
   });
 }
