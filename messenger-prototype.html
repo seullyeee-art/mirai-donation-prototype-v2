@@ -339,6 +339,23 @@ body.messenger-mode .desktop-blur{display:none}
 .msg-bubble .narr{color:rgba(255,255,255,0.5)}
 .msg-user .msg-bubble .narr{color:rgba(26,26,28,0.5)}
 
+/* 타이핑 인디케이터 */
+.msg-bubble.msg-typing{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:14px 16px;
+}
+.msg-bubble.msg-typing span{
+  width:7px;height:7px;border-radius:50%;
+  background:rgba(255,255,255,0.55);
+  animation:typingDot 1.2s ease-in-out infinite;
+}
+.msg-bubble.msg-typing span:nth-child(2){animation-delay:0.15s}
+.msg-bubble.msg-typing span:nth-child(3){animation-delay:0.3s}
+@keyframes typingDot{
+  0%,100%{transform:translateY(0);opacity:0.4}
+  50%{transform:translateY(-3px);opacity:1}
+}
+
 /* 캐릭터 버블 액션 (수정/신고) — 오른쪽 정렬 */
 .msg-actions{
   align-self:flex-end;
@@ -2939,7 +2956,28 @@ const _AI_REPLIES = [
 
 function scheduleAIReply(){
   const r = _AI_REPLIES[Math.floor(Math.random() * _AI_REPLIES.length)];
-  setTimeout(() => appendCharBubble(r), 900);
+  const feed = document.getElementById('chatFeed');
+  if (!feed) return;
+  const avatar = KEN_AVATARS[r.speaker] || './images/kennedy-thumb.webp';
+  // 타이핑 인디케이터 표시
+  const typing = document.createElement('div');
+  typing.className = 'msg msg-char';
+  typing.id = '__typingBubble';
+  typing.innerHTML = `
+    <div class="msg-stack">
+      <div class="msg-header">
+        <img class="msg-avatar" src="${avatar}" alt="">
+        <span class="msg-name">${escapeHtml(r.speaker)}</span>
+      </div>
+      <div class="msg-bubble msg-typing"><span></span><span></span><span></span></div>
+    </div>`;
+  feed.appendChild(typing);
+  feed.scrollTop = feed.scrollHeight;
+
+  setTimeout(() => {
+    typing.remove();
+    appendCharBubble(r);
+  }, 2000);
 }
 
 function appendCharBubble(m){
