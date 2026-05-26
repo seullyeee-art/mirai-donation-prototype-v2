@@ -338,9 +338,10 @@ body.messenger-mode .desktop-blur{display:none}
 .msg-bubble .narr{color:rgba(255,255,255,0.5)}
 .msg-user .msg-bubble .narr{color:rgba(26,26,28,0.5)}
 
-/* 캐릭터 버블 액션 (수정/신고) */
+/* 캐릭터 버블 액션 (수정/신고) — 오른쪽 정렬 */
 .msg-actions{
-  display:flex;gap:4px;margin-top:4px;padding-left:4px;
+  align-self:flex-end;
+  display:flex;gap:4px;margin-top:4px;padding-right:4px;
   opacity:0.55;transition:opacity 0.15s ease;
 }
 .msg-stack:hover .msg-actions{opacity:1}
@@ -1697,8 +1698,9 @@ body.intro-mode .stat-panel{display:none !important}
       <div class="progress-icons">
         <button class="prog-icon-btn" id="prevTurnBtn" onclick="confirmUndoTurn()" title="되돌리기"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 010 11H11"/></svg></button>
         <button class="prog-icon-btn" id="statToggleBtn" onclick="toggleStats()" title="스탯 토글"><img id="statToggleIcon" src="./images/icon/chat-bubble.svg?v=7" alt="스탯" style="width:18px;height:18px"></button>
-        <button class="prog-icon-btn" id="dlgEditBtn" onclick="showEditModal()" title="대사 수정"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.15 1.85C10.95 1.05 12.25 1.05 13.05 1.85L14.15 2.95C14.95 3.75 14.95 5.05 14.15 5.85L5.55 14.45C5.35 14.65 5.1 14.75 4.85 14.75H2.25C1.75 14.75 1.35 14.35 1.35 13.85V11.25C1.35 11 1.45 10.75 1.65 10.55L10.15 1.85ZM11.05 2.95C10.75 2.65 10.45 2.65 10.15 2.95L8.95 4.15L11.85 7.05L13.05 5.85C13.35 5.55 13.35 5.25 13.05 4.95L11.05 2.95ZM10.85 8.05L7.95 5.15L2.75 10.35V13.35H5.55L10.85 8.05Z" fill="currentColor" fill-opacity="0.85"/></svg></button>
-        <button class="prog-icon-btn" id="dlgReportBtn" onclick="reportMessage()" title="신고하기" aria-label="신고하기"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18a7 7 0 0 1 14 0"/><line x1="3" y1="18" x2="21" y2="18"/><line x1="12" y1="9" x2="12" y2="2"/><line x1="6" y1="6" x2="7" y2="7"/><line x1="18" y1="6" x2="17" y2="7"/></svg></button>
+        <!-- 메신저 모드에선 버블 액션으로 대체 -->
+        <!-- <button class="prog-icon-btn" id="dlgEditBtn" onclick="showEditModal()" title="대사 수정">...</button>
+        <button class="prog-icon-btn" id="dlgReportBtn" onclick="reportMessage()" title="신고하기">...</button> -->
       </div>
     </div>
     <div class="input-wrap">
@@ -2868,12 +2870,37 @@ document.getElementById('overlayBackdrop').addEventListener('click', () => {
 });
 
 // Toast
-// ═══ SEND MESSAGE ═══
+// ═══ SEND MESSAGE (메신저 모드 — 유저 버블 추가) ═══
 function sendMessage() {
   const input = document.querySelector('.input-field');
-  const text = input.value.trim() || '(메시지 전송)';
+  const text = input.value.trim();
+  if (!text) return;
   input.value = '';
   input.style.height = 'auto';
+
+  if (document.body.classList.contains('messenger-mode')) {
+    appendUserBubble(text);
+    return;
+  }
+  // 이하는 미연시 모드 (현재 messenger-mode라 도달하지 않음) — 호환용
+  _legacySendDialogue(text);
+}
+
+function appendUserBubble(text) {
+  const feed = document.getElementById('chatFeed');
+  if (!feed) return;
+  const el = document.createElement('div');
+  el.className = 'msg msg-user';
+  el.innerHTML = `
+    <div class="msg-stack">
+      <div class="msg-bubble">${escapeHtml(text)}</div>
+    </div>`;
+  feed.appendChild(el);
+  setTimeout(() => { feed.scrollTop = feed.scrollHeight; }, 0);
+}
+
+function _legacySendDialogue(text) {
+  text = text || '(메시지 전송)';
 
   // 선택지 숨기고 대사 영역 복원
   const choiceCards = document.getElementById('choiceCards');
