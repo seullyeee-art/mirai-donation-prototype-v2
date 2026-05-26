@@ -138,11 +138,14 @@ body{
 }
 .profile-pill .avatar{
   width:24px;height:24px;border-radius:12px;flex-shrink:0;
-  position:relative;overflow:hidden;
+  position:relative;
+}
+.profile-pill .avatar img{
+  width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block;
 }
 .profile-pill .avatar::after{
   content:'';position:absolute;inset:0;border-radius:inherit;
-  box-shadow:inset 0 0 0 1px rgba(0,0,0,0.35);
+  box-shadow:inset 0 0 0 1.5px rgba(0,0,0,0.55);
   pointer-events:none;
 }
 .profile-pill .avatar img{width:100%;height:100%;object-fit:cover}
@@ -250,10 +253,7 @@ body.messenger-mode .name-row-wrap,
 body.messenger-mode .dlg-tap-area,
 body.messenger-mode .tap-zone-container,
 body.messenger-mode .stat-panel{display:none !important}
-body.messenger-mode .top-gradient{
-  height:140px;
-  background:linear-gradient(180deg, rgba(10,10,12,0.7) 0%, rgba(10,10,12,0.4) 45%, transparent 100%);
-}
+body.messenger-mode .top-gradient{display:none !important}
 
 /* 풀뷰포트 배경 (미연시 UI와 동일 패턴) */
 .chat-bg{
