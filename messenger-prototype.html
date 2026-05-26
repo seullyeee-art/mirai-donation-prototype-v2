@@ -269,7 +269,7 @@ body.messenger-mode .desktop-blur{display:none}
   bottom:0;
   z-index:1;
   overflow-y:auto;-webkit-overflow-scrolling:touch;
-  padding:24px 16px 220px;
+  padding:24px 16px max(180px, calc(env(safe-area-inset-bottom) + 160px));
   display:flex;flex-direction:column;gap:12px;
   scrollbar-width:none;
 }
@@ -2517,7 +2517,7 @@ function appendNarrationBubble(text){
       }
       i++;
       typedEl.textContent = text.slice(0, i);
-      el.scrollIntoView({block:'end', behavior:'smooth'});
+      feed.scrollTop = feed.scrollHeight;
     }, 28);
   });
 }
@@ -2561,7 +2561,7 @@ function appendCharBubbleAnimated(m){
       } else {
         typedEl.innerHTML = `<span class="narr">${escapeHtml(narrPart)} </span>${escapeHtml(shown.slice(narrLen))}`;
       }
-      el.scrollIntoView({block:'end', behavior:'smooth'});
+      feed.scrollTop = feed.scrollHeight;
     }, 32);
   });
 }
