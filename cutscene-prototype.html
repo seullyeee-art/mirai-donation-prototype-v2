@@ -1659,14 +1659,8 @@ body.intro-mode .stat-panel{display:none !important}
 <!-- BGM Audio -->
 <audio id="bgmAudio" src="./audio/daily-bgm.mp3" loop preload="auto" muted></audio>
 
-<!-- BGM Intro Overlay -->
-<div class="bgm-intro" id="bgmIntro" onclick="dismissBgmIntro()">
-  <div class="bgm-intro-inner">
-    <svg class="bgm-icon" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
-    <div class="bgm-title">사운드가 포함된 콘텐츠입니다</div>
-    <div class="bgm-hint">터치해서 넘기기</div>
-  </div>
-</div>
+<!-- BGM Intro Overlay 제거 (컷씬 데모) -->
+<div class="bgm-intro" id="bgmIntro" hidden></div>
 
 <div class="toast-container" id="toastContainer"></div>
 
@@ -1933,23 +1927,8 @@ body.intro-mode .stat-panel{display:none !important}
 
 <iframe class="content-detail-frame" id="contentDetailFrame" hidden src="about:blank"></iframe>
 
-<!-- 첫 진입 터치 안내 코치마크 -->
-<div class="tap-coach" id="tapCoach" hidden onclick="dismissTapCoach()">
-  <div class="tap-coach-sound">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
-    사운드가 포함된 콘텐츠입니다
-  </div>
-  <div class="tap-coach-text">화면을 <b>탭</b>하면<br>이야기가 이어져요</div>
-  <div class="tap-coach-demo">
-    <span class="tap-coach-ripple"></span>
-    <svg class="tap-coach-finger" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 11.24V7.5C9 6.12 10.12 5 11.5 5S14 6.12 14 7.5v3.74c1.21-.81 2-2.18 2-3.74C16 5.01 13.99 3 11.5 3S7 5.01 7 7.5c0 1.56.79 2.93 2 3.74zm9.84 4.63l-4.54-2.26c-.17-.07-.35-.11-.54-.11H13v-6C13 6.67 12.33 6 11.5 6S10 6.67 10 7.5v10.74l-3.43-.72c-.08-.01-.15-.03-.24-.03-.31 0-.59.13-.79.33l-.79.8 4.94 4.94c.27.27.65.44 1.06.44h6.79c.75 0 1.33-.55 1.44-1.28l.75-5.27c.01-.07.02-.14.02-.2 0-.62-.38-1.16-.92-1.38z"/></svg>
-  </div>
-  <div class="tap-coach-zones">
-    <span class="tap-coach-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>왼쪽 이전</span>
-    <span class="tap-coach-chip next">오른쪽 다음<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span>
-  </div>
-  <div class="tap-coach-dismiss">아무 곳이나 탭해서 시작</div>
-</div>
+<!-- 코치마크 제거 (컷씬 데모) -->
+<div class="tap-coach" id="tapCoach" hidden></div>
 
 <script>
 // ═══ TAP COACH MARK (첫 진입 터치 안내) ═══
@@ -2285,8 +2264,10 @@ function dismissBgmIntro() {
   startDialogueFlow();
 }
 document.addEventListener('DOMContentLoaded', () => {
-  // 진입 시 코치마크를 터치 게이트로 표시 (다이얼로그/bgm은 첫 터치까지 대기)
-  showTapCoach();
+  // 컷씬 데모 — 가이드 없이 바로 대사 + 컷씬 잠금 UI 표시
+  bgmIntroShown = true;
+  document.body.classList.remove('intro-mode');
+  startDialogueFlow();
 });
 function insertAsterisk() {
   const input = document.querySelector('.input-field');
