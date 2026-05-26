@@ -2956,26 +2956,15 @@ const _AI_REPLIES = [
 
 function scheduleAIReply(){
   const r = _AI_REPLIES[Math.floor(Math.random() * _AI_REPLIES.length)];
-  const feed = document.getElementById('chatFeed');
-  if (!feed) return;
-  const avatar = KEN_AVATARS[r.speaker] || './images/kennedy-thumb.webp';
-  // 타이핑 인디케이터 표시
-  const typing = document.createElement('div');
-  typing.className = 'msg msg-char';
-  typing.id = '__typingBubble';
-  typing.innerHTML = `
-    <div class="msg-stack">
-      <div class="msg-header">
-        <img class="msg-avatar" src="${avatar}" alt="">
-        <span class="msg-name">${escapeHtml(r.speaker)}</span>
-      </div>
-      <div class="msg-bubble msg-typing"><span></span><span></span><span></span></div>
-    </div>`;
-  feed.appendChild(typing);
-  feed.scrollTop = feed.scrollHeight;
+  // 기존 progress-row 로딩 텍스트 사용 ('잠시 기다려주세요....')
+  const label = document.querySelector('.progress-label');
+  const loading = document.getElementById('progressLoading');
+  if (label) label.style.display = 'none';
+  if (loading) loading.style.display = 'flex';
 
   setTimeout(() => {
-    typing.remove();
+    if (loading) loading.style.display = 'none';
+    if (label) label.style.display = '';
     appendCharBubble(r);
   }, 2000);
 }
