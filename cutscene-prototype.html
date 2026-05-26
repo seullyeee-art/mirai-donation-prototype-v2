@@ -1517,7 +1517,7 @@ body.intro-mode .stat-panel{display:none !important}
 📍 위치: 연화궁 앞뜰
 📜 진행도: [초기 탐색]</div><div class="stat-handle"></div></div>
 
-  <div class="char-area cutscene-locked" id="charArea">
+  <div class="char-area" id="charArea">
     <!-- 캐릭터 전신 이미지: ./images/char-iseol.png -->
     <div class="char-img"></div>
     <div class="char-img-overlay" id="charImgArea" style="background-image:url('./images/char-iseol.png')"></div>
@@ -2237,8 +2237,18 @@ function confirmUndoTurn() {
   });
 }
 
+let cutsceneUnlocked = false;
+function applyCutsceneState(idx) {
+  const area = document.getElementById('charArea');
+  if (!area) return;
+  if (cutsceneUnlocked) { area.classList.remove('cutscene-locked'); return; }
+  // 첫 대사(0) 일반, 두 번째 대사(1)부터 컷씬 잠금 활성화
+  if (idx >= 1) area.classList.add('cutscene-locked');
+  else area.classList.remove('cutscene-locked');
+}
 function confirmCutsceneUnlock() {
   showConfirm('컷씬을 해금하시겠습니까?', '120 미르가 차감되며 앨범에 영구 추가됩니다.', () => {
+    cutsceneUnlocked = true;
     const area = document.getElementById('charArea');
     if (area) area.classList.remove('cutscene-locked');
     showToast('컷씬을 해금했어요');
@@ -2429,6 +2439,7 @@ function showDialogue(idx, skipTTS) {
   if (tapHintRipple) tapHintRipple.classList.remove('show');
 
   const isLast = idx >= DIALOGUES.length - 1;
+  applyCutsceneState(idx);
   // 이미 읽은 페이지는 바로 표시
   if (seenDialogues.has(idx)) {
     el.innerHTML = dlg.lines.map(l => '<div class="ln">' + l + '</div>').join('');
