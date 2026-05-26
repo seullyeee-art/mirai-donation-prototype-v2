@@ -339,36 +339,6 @@ body{
   .cutscene-lock-icon{animation:none !important}
 }
 
-/* ═══ 해제 순간 애니메이션 ═══ */
-/* 자물쇠 뱃지 — 고리만 클릭 열림 */
-.char-area.cutscene-revealing .badge-shackle{
-  transform-origin:16px 11px;
-  transform-box:fill-box;
-  animation:shackleClick 0.35s cubic-bezier(.2,.9,.4,1) forwards;
-}
-@keyframes shackleClick{
-  0%{transform:rotate(0) translate(0,0)}
-  100%{transform:rotate(-55deg) translate(-1px,-2px)}
-}
-/* 자물쇠 뱃지 전체 — 짧은 딜레이 후 페이드 */
-.char-area.cutscene-revealing .cutscene-profile-lock{
-  animation:badgeFade 0.5s ease-out 0.18s forwards;
-}
-@keyframes badgeFade{
-  to{opacity:0;transform:scale(0.9)}
-}
-/* 자물쇠 위치에서 소프트 글로우 halo (블루그린) */
-.char-area.cutscene-revealing .cutscene-lock-icon::after{
-  content:'';position:absolute;inset:-14px;border-radius:50%;
-  background:radial-gradient(circle, rgba(20,195,145,0.55), rgba(61,143,245,0.25) 50%, transparent 75%);
-  animation:lockGlow 0.85s ease-out forwards;
-  pointer-events:none;
-}
-@keyframes lockGlow{
-  0%{transform:scale(0.55);opacity:0}
-  30%{opacity:1}
-  100%{transform:scale(2);opacity:0}
-}
 
 /* ═══ BOTTOM GRADIENT ═══ */
 .bottom-gradient{
@@ -2274,22 +2244,12 @@ function applyCutsceneState(idx) {
 }
 function confirmCutsceneUnlock() {
   showConfirm('컷씬을 해금하시겠습니까?', '120 미르가 차감되며 앨범에 영구 추가됩니다.', () => {
+    cutsceneUnlocked = true;
     const area = document.getElementById('charArea');
+    if (area) area.classList.remove('cutscene-locked');
     const overlay = document.getElementById('charImgArea');
-    if (!area) return;
-    // 1. 플래시 + 자물쇠 뱃지 burst
-    area.classList.add('cutscene-revealing');
-    // 2. 짧은 딜레이 — 블러 해제 + 이미지 스왑
-    setTimeout(() => {
-      cutsceneUnlocked = true;
-      area.classList.remove('cutscene-locked');
-      if (overlay) overlay.style.backgroundImage = CUTSCENE_IMG;
-    }, 240);
-    // 3. 끝나면 클래스 정리 + 토스트
-    setTimeout(() => {
-      area.classList.remove('cutscene-revealing');
-      showToast('컷씬을 해금했어요');
-    }, 1000);
+    if (overlay) overlay.style.backgroundImage = CUTSCENE_IMG;
+    showToast('컷씬을 해금했어요');
   });
 }
 
