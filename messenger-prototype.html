@@ -411,13 +411,15 @@ body.messenger-mode .desktop-blur{display:none}
 .msg-suggest:hover{transform:translateY(-1px)}
 .msg-suggest:active{transform:scale(0.98);opacity:0.9}
 
-/* 이미지 버블 — 4:5 비율 카드 */
+/* 이미지 버블 — 4:5 비율 카드 + 페이드인 */
 .msg-img{
   position:relative;width:200px;max-width:100%;
   aspect-ratio:4/5;
   border-radius:14px;overflow:hidden;
   background:rgba(28,28,30,0.9);
+  opacity:0;animation:imgFadeIn 0.55s ease-out forwards;
 }
+@keyframes imgFadeIn{to{opacity:1}}
 .msg-img img{display:block;width:100%;height:100%;object-fit:cover;object-position:center top}
 
 /* 잠긴 이미지 버블 */
@@ -2445,16 +2447,15 @@ function dismissBgmIntro() {
   }
   startDialogueFlow();
 }
-document.addEventListener('DOMContentLoaded', () => {
-  // 메신저 모드 — 가이드 없이 바로 피드 렌더
+document.addEventListener('DOMContentLoaded', async () => {
   bgmIntroShown = true;
   document.body.classList.remove('intro-mode');
-  renderChatFeed();
-  // 첫 로드 시 답장 제안 노출
-  setTimeout(showSuggestions, 600);
+  await renderChatFeed();
+  // 전체 렌더 끝난 후 2초 뒤 답장 제안
+  setTimeout(showSuggestions, 2000);
 });
 
-function renderChatFeed() {
+async function renderChatFeed() {
   const feed = document.getElementById('chatFeed');
   if (!feed) return;
   feed.innerHTML = '';
@@ -2463,37 +2464,68 @@ function renderChatFeed() {
   timeHeader.textContent = 'May 12, 2026';
   feed.appendChild(timeHeader);
 
-  const actionsHtml = `
-    <div class="msg-actions">
-      <button class="msg-action" title="대사 수정" onclick="showToast('대사 수정')"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.15 1.85C10.95 1.05 12.25 1.05 13.05 1.85L14.15 2.95C14.95 3.75 14.95 5.05 14.15 5.85L5.55 14.45C5.35 14.65 5.1 14.75 4.85 14.75H2.25C1.75 14.75 1.35 14.35 1.35 13.85V11.25C1.35 11 1.45 10.75 1.65 10.55L10.15 1.85ZM11.05 2.95C10.75 2.65 10.45 2.65 10.15 2.95L8.95 4.15L11.85 7.05L13.05 5.85C13.35 5.55 13.35 5.25 13.05 4.95L11.05 2.95ZM10.85 8.05L7.95 5.15L2.75 10.35V13.35H5.55L10.85 8.05Z" fill="currentColor" fill-opacity="0.85"/></svg></button>
-      <button class="msg-action" title="삭제" onclick="this.closest('.msg').remove()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg></button>
-    </div>`;
-
-  MESSAGES.forEach((m) => {
+  for (const m of MESSAGES) {
     if (m.type === 'narration') {
-      const el = document.createElement('div');
-      el.className = 'msg msg-char';
-      el.innerHTML = `
-        <div class="msg-stack">
-          <div class="msg-bubble msg-narration">${escapeHtml(m.text)}</div>
-          ${actionsHtml}
-        </div>`;
-      feed.appendChild(el);
-      return;
+      await appendNarrationBubble(m.text);
+      await wait(350);
+    } else if (m.type === 'image') {
+      appendImageBubble(m.img);
+      await wait(450);
+    } else {
+      await appendCharBubbleAnimated(m);
+      await wait(450);
     }
-    if (m.type === 'image') {
-      const el = document.createElement('div');
-      el.className = 'msg msg-char';
-      el.innerHTML = `
-        <div class="msg-stack">
-          <div class="msg-img"><img src="${m.img}" alt=""></div>
-        </div>`;
-      feed.appendChild(el);
-      return;
-    }
-    // dialogue
+  }
+}
+
+function wait(ms){return new Promise(r => setTimeout(r, ms))}
+
+function appendImageBubble(src){
+  const feed = document.getElementById('chatFeed');
+  const el = document.createElement('div');
+  el.className = 'msg msg-char';
+  el.innerHTML = `
+    <div class="msg-stack">
+      <div class="msg-img"><img src="${src}" alt=""></div>
+    </div>`;
+  feed.appendChild(el);
+  el.scrollIntoView({block:'end', behavior:'smooth'});
+}
+
+function appendNarrationBubble(text){
+  return new Promise(resolve => {
+    const feed = document.getElementById('chatFeed');
+    const el = document.createElement('div');
+    el.className = 'msg msg-char';
+    el.innerHTML = `
+      <div class="msg-stack">
+        <div class="msg-bubble msg-narration"><span class="msg-typed"></span><span class="msg-cursor"></span></div>
+      </div>`;
+    feed.appendChild(el);
+    el.scrollIntoView({block:'end', behavior:'smooth'});
+    const stackEl = el.querySelector('.msg-stack');
+    const typedEl = el.querySelector('.msg-typed');
+    const cursorEl = el.querySelector('.msg-cursor');
+    let i = 0;
+    const tick = setInterval(() => {
+      if (i >= text.length){
+        clearInterval(tick);
+        cursorEl.remove();
+        stackEl.insertAdjacentHTML('beforeend', _msgActionsHtml());
+        resolve();
+        return;
+      }
+      i++;
+      typedEl.textContent = text.slice(0, i);
+      el.scrollIntoView({block:'end', behavior:'smooth'});
+    }, 28);
+  });
+}
+
+function appendCharBubbleAnimated(m){
+  return new Promise(resolve => {
+    const feed = document.getElementById('chatFeed');
     const avatar = KEN_AVATARS[m.speaker] || './images/kennedy-thumb.webp';
-    const narrHtml = m.narr ? `<span class="narr">${escapeHtml(m.narr)} </span>` : '';
     const el = document.createElement('div');
     el.className = 'msg msg-char';
     el.innerHTML = `
@@ -2502,13 +2534,36 @@ function renderChatFeed() {
           <img class="msg-avatar" src="${avatar}" alt="">
           <span class="msg-name">${escapeHtml(m.speaker)}</span>
         </div>
-        <div class="msg-bubble">${narrHtml}${escapeHtml(m.text)}</div>
-        ${actionsHtml}
+        <div class="msg-bubble"><span class="msg-typed"></span><span class="msg-cursor"></span></div>
       </div>`;
     feed.appendChild(el);
+    el.scrollIntoView({block:'end', behavior:'smooth'});
+    const stackEl = el.querySelector('.msg-stack');
+    const typedEl = el.querySelector('.msg-typed');
+    const cursorEl = el.querySelector('.msg-cursor');
+    const narrPart = m.narr || '';
+    const textPart = m.text || '';
+    const fullChars = narrPart + (narrPart ? ' ' : '') + textPart;
+    const narrLen = narrPart ? narrPart.length + 1 : 0;
+    let i = 0;
+    const tick = setInterval(() => {
+      if (i >= fullChars.length){
+        clearInterval(tick);
+        cursorEl.remove();
+        stackEl.insertAdjacentHTML('beforeend', _msgActionsHtml());
+        resolve();
+        return;
+      }
+      i++;
+      const shown = fullChars.slice(0, i);
+      if (narrLen > 0 && i <= narrLen){
+        typedEl.innerHTML = `<span class="narr">${escapeHtml(shown)}</span>`;
+      } else {
+        typedEl.innerHTML = `<span class="narr">${escapeHtml(narrPart)} </span>${escapeHtml(shown.slice(narrLen))}`;
+      }
+      el.scrollIntoView({block:'end', behavior:'smooth'});
+    }, 32);
   });
-
-  setTimeout(() => { feed.scrollTop = feed.scrollHeight; }, 0);
 }
 
 function escapeHtml(s) {
@@ -2998,7 +3053,7 @@ function scheduleAIReply(){
     if (label) label.style.display = '';
     appendCharBubble(r);
     // 타이핑 소요시간 추정 + 2초 더 기다린 후 페이드인
-    const typingMs = ((r.narr ? r.narr.length + 1 : 0) + (r.text || '').length) * 22 + 2000;
+    const typingMs = ((r.narr ? r.narr.length + 1 : 0) + (r.text || '').length) * 32 + 2000;
     setTimeout(showSuggestions, typingMs);
   }, 2000);
 }
@@ -3075,7 +3130,7 @@ function appendCharBubble(m){
       typedEl.innerHTML = `<span class="narr">${escapeHtml(narrPart)} </span>${escapeHtml(shown.slice(narrLen))}`;
     }
     feed.scrollTop = feed.scrollHeight;
-  }, 22);
+  }, 32);
 }
 
 function showToast(msg) {
