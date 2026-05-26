@@ -236,6 +236,66 @@ body{
   .char-img-overlay{background-size:auto 95%;background-position:center center;background-color:transparent}
 }
 
+/* ═══ 컷씬 잠금 오버레이 ═══ */
+.char-area.cutscene-locked .char-img,
+.char-area.cutscene-locked .char-img-overlay{
+  filter:blur(26px) brightness(0.55) saturate(0.85);
+  transform:scale(1.05);
+  transition:filter 0.4s ease, transform 0.4s ease;
+}
+.char-area .char-img,
+.char-area .char-img-overlay{
+  transition:filter 0.5s ease, transform 0.5s ease;
+}
+.cutscene-lock{
+  position:absolute;left:50%;top:50%;
+  transform:translate(-50%,-50%);
+  z-index:5;
+  width:min(280px, calc(100% - 48px));
+  display:flex;flex-direction:column;align-items:center;gap:14px;
+  text-align:center;
+  opacity:0;pointer-events:none;
+  transition:opacity 0.35s ease;
+}
+.char-area.cutscene-locked .cutscene-lock{opacity:1;pointer-events:auto}
+.cutscene-lock-icon{
+  width:56px;height:56px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.18);
+  -webkit-backdrop-filter:blur(20px) saturate(1.2);backdrop-filter:blur(20px) saturate(1.2);
+  box-shadow:0 4px 16px rgba(0,0,0,0.35);
+}
+.cutscene-lock-icon svg{width:26px;height:26px;color:#fff;opacity:0.95}
+.cutscene-lock-tag{
+  display:inline-block;padding:4px 10px;border-radius:10px;
+  background:rgba(250,115,227,0.85);
+  font-size:10px;font-weight:700;color:#fff;
+  letter-spacing:0.5px;
+}
+.cutscene-lock-title{
+  font-size:17px;font-weight:800;color:#fff;
+  line-height:1.35;
+  text-shadow:0 2px 8px rgba(0,0,0,0.6);
+}
+.cutscene-lock-desc{
+  font-size:12px;color:rgba(255,255,255,0.78);
+  line-height:1.5;
+  text-shadow:0 1px 4px rgba(0,0,0,0.5);
+}
+.cutscene-lock-btn{
+  margin-top:4px;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  height:48px;padding:0 22px;border-radius:12px;border:none;cursor:pointer;
+  background:linear-gradient(116deg,var(--primary-normal),var(--primary-heavy));
+  color:#fff;font-family:inherit;font-size:15px;font-weight:700;letter-spacing:-0.2px;
+  box-shadow:0 6px 24px rgba(20,195,145,0.4);
+  transition:transform 0.15s ease, box-shadow 0.2s ease;
+}
+.cutscene-lock-btn:active{transform:scale(0.97);box-shadow:0 3px 12px rgba(20,195,145,0.3)}
+.cutscene-lock-btn img{width:16px;height:16px;object-fit:contain}
+.cutscene-lock-btn .price{font-weight:800}
+
 /* ═══ BOTTOM GRADIENT ═══ */
 .bottom-gradient{
   position:absolute;bottom:0;left:0;right:0;
@@ -1423,11 +1483,29 @@ body.intro-mode .stat-panel{display:none !important}
 📍 위치: 연화궁 앞뜰
 📜 진행도: [초기 탐색]</div><div class="stat-handle"></div></div>
 
-  <div class="char-area">
+  <div class="char-area cutscene-locked" id="charArea">
     <!-- 캐릭터 전신 이미지: ./images/char-iseol.png -->
     <div class="char-img"></div>
     <div class="char-img-overlay" id="charImgArea" style="background-image:url('./images/char-iseol.png')"></div>
     <div class="char-visual">🗡️</div>
+
+    <!-- 컷씬 잠금 오버레이 -->
+    <div class="cutscene-lock" id="cutsceneLock">
+      <span class="cutscene-lock-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="4" y="11" width="16" height="10" rx="2"/>
+          <path d="M8 11V8a4 4 0 0 1 8 0v3"/>
+        </svg>
+      </span>
+      <span class="cutscene-lock-tag">CUTSCENE</span>
+      <div class="cutscene-lock-title">잠금된 컷씬</div>
+      <div class="cutscene-lock-desc">해금하면 이 장면을 풀 일러스트로 감상하고<br>앨범에 영구 추가됩니다</div>
+      <button class="cutscene-lock-btn" type="button" onclick="confirmCutsceneUnlock()">
+        <img src="./images/mir.png" alt="" onerror="this.style.display='none'">
+        <span class="price">120</span>
+        <span>잠금 해제</span>
+      </button>
+    </div>
   </div>
 
   <div class="affinity-stack" id="affinityStack">
@@ -2111,6 +2189,14 @@ document.getElementById('confirmYesBtn').addEventListener('click', () => {
 function confirmUndoTurn() {
   showConfirm('되돌리시겠습니까?', '이전 턴으로 되돌립니다.', () => {
     showToast('이전 턴으로 되돌림');
+  });
+}
+
+function confirmCutsceneUnlock() {
+  showConfirm('컷씬을 해금하시겠습니까?', '120 미르가 차감되며 앨범에 영구 추가됩니다.', () => {
+    const area = document.getElementById('charArea');
+    if (area) area.classList.remove('cutscene-locked');
+    showToast('컷씬을 해금했어요');
   });
 }
 
