@@ -246,6 +246,12 @@ body{
   filter:blur(18px) brightness(0.6) saturate(0.85);
   transform:scale(1.06);
 }
+@media (min-width:769px){
+  .char-area.cutscene-locked .char-img,
+  .char-area.cutscene-locked .char-img-overlay{
+    filter:blur(32px) brightness(0.55) saturate(0.85);
+  }
+}
 /* 시네마틱 비네트 */
 .char-area.cutscene-locked::before{
   content:'';position:absolute;inset:0;z-index:3;pointer-events:none;
