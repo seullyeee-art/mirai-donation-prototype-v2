@@ -2221,10 +2221,12 @@ let cutsceneUnlocked = false;
 const BASE_IMG = "url('./images/iseol-base.webp')";
 const LOCKED_IMG = "url('./images/iseol-cutscene-locked.webp')";
 const CUTSCENE_IMG = "url('./images/iseol-cutscene.webp')";
+let currentOverlayImg = BASE_IMG; // HTML 인라인 초기값과 일치
 function swapOverlay(img) {
+  if (currentOverlayImg === img) return;
+  currentOverlayImg = img;
   const overlay = document.getElementById('charImgArea');
   if (!overlay) return;
-  if (overlay.style.backgroundImage === img) return;
   overlay.style.opacity = '0';
   setTimeout(() => {
     overlay.style.backgroundImage = img;
