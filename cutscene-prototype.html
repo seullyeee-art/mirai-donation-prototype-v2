@@ -271,6 +271,11 @@ body{
   opacity:1;pointer-events:auto;
   transform:translateX(-50%) translateY(0);
 }
+/* 선택지 열려있을 땐 컷씬 잠금 안내 숨김 */
+.screen.choices-open .char-area.cutscene-locked .cutscene-lock{
+  opacity:0;pointer-events:none;
+  transform:translateX(-50%) translateY(8px);
+}
 @media (min-width:769px){
   .cutscene-lock{top:34%}
 }
@@ -332,6 +337,36 @@ body{
 
 @media (prefers-reduced-motion:reduce){
   .cutscene-lock-icon{animation:none !important}
+}
+
+/* ═══ 해제 순간 애니메이션 ═══ */
+.char-area.cutscene-revealing::after{
+  content:'';position:absolute;inset:0;z-index:7;pointer-events:none;
+  background:radial-gradient(ellipse at center 38%, rgba(255,255,255,0.85), transparent 60%);
+  animation:cutsceneFlash 0.9s ease-out;
+}
+@keyframes cutsceneFlash{
+  0%{opacity:0}
+  20%{opacity:1}
+  100%{opacity:0}
+}
+.char-area.cutscene-revealing .cutscene-profile-lock{
+  animation:lockBurst 0.55s ease-out forwards;
+}
+@keyframes lockBurst{
+  0%{transform:scale(1);opacity:1}
+  40%{transform:scale(1.5);opacity:1}
+  100%{transform:scale(2.2);opacity:0}
+}
+.char-area.cutscene-revealing .cutscene-lock-icon::after{
+  content:'';position:absolute;inset:-8px;border-radius:50%;
+  border:2px solid rgba(255,255,255,0.85);
+  animation:lockRingPulse 0.7s ease-out forwards;
+  pointer-events:none;
+}
+@keyframes lockRingPulse{
+  0%{transform:scale(0.6);opacity:0.9}
+  100%{transform:scale(2.2);opacity:0}
 }
 
 /* ═══ BOTTOM GRADIENT ═══ */
@@ -2238,12 +2273,22 @@ function applyCutsceneState(idx) {
 }
 function confirmCutsceneUnlock() {
   showConfirm('컷씬을 해금하시겠습니까?', '120 미르가 차감되며 앨범에 영구 추가됩니다.', () => {
-    cutsceneUnlocked = true;
     const area = document.getElementById('charArea');
-    if (area) area.classList.remove('cutscene-locked');
     const overlay = document.getElementById('charImgArea');
-    if (overlay) overlay.style.backgroundImage = CUTSCENE_IMG;
-    showToast('컷씬을 해금했어요');
+    if (!area) return;
+    // 1. 플래시 + 자물쇠 뱃지 burst
+    area.classList.add('cutscene-revealing');
+    // 2. 짧은 딜레이 — 블러 해제 + 이미지 스왑
+    setTimeout(() => {
+      cutsceneUnlocked = true;
+      area.classList.remove('cutscene-locked');
+      if (overlay) overlay.style.backgroundImage = CUTSCENE_IMG;
+    }, 240);
+    // 3. 끝나면 클래스 정리 + 토스트
+    setTimeout(() => {
+      area.classList.remove('cutscene-revealing');
+      showToast('컷씬을 해금했어요');
+    }, 1000);
   });
 }
 
