@@ -1682,7 +1682,11 @@ body.intro-mode .stat-panel{display:none !important}
     drop-shadow(0 0 5px rgba(26,224,168,0.34))
     drop-shadow(0 0 12px rgba(20,195,145,0.22))
     drop-shadow(0 0 20px rgba(20,195,145,0.11));
+  animation:gemFloat 3s ease-in-out infinite;
 }
+.b-modal .mir-card:nth-child(2) .mir-pile img{animation-delay:0.4s}
+.b-modal .mir-card:nth-child(3) .mir-pile img{animation-delay:0.8s}
+@media (prefers-reduced-motion:reduce){.b-modal .mir-pile img{animation:none}}
 .b-modal .mir-amt{font-size:13px;font-weight:800;color:var(--label-strong);letter-spacing:-0.3px}
 .b-modal .mir-bns{font-size:10px;font-weight:800;color:var(--primary-normal);min-height:12px;margin-bottom:10px;letter-spacing:-0.2px;text-shadow:0 0 6px rgba(20,195,145,0.4)}
 .b-modal .mir-pbtn{
