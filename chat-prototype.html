@@ -1657,10 +1657,6 @@ body.intro-mode .stat-panel{display:none !important}
   transition:transform .18s cubic-bezier(.34,1.56,.64,1), border-color .2s, box-shadow .2s;
 }
 .b-modal .mir-card:active{transform:scale(0.96)}
-.b-modal .mir-card.selected{
-  border-color:var(--primary-normal);
-  box-shadow:0 8px 22px rgba(20,195,145,0.30), 0 0 0 1px var(--primary-normal) inset;
-}
 .b-modal .mir-badge{
   position:absolute;top:-8px;right:6px;padding:3px 9px;border-radius:999px;
   font-size:10px;font-weight:900;color:#fff;
@@ -1690,9 +1686,13 @@ body.intro-mode .stat-panel{display:none !important}
 .b-modal .mir-amt{font-size:13px;font-weight:800;color:var(--label-strong);letter-spacing:-0.3px}
 .b-modal .mir-bns{font-size:10px;font-weight:800;color:var(--primary-normal);min-height:12px;margin-bottom:10px;letter-spacing:-0.2px;text-shadow:0 0 6px rgba(20,195,145,0.4)}
 .b-modal .mir-pbtn{
-  font-size:13px;font-weight:800;color:var(--label-strong);letter-spacing:-0.3px;margin-top:auto;
-  background:none;border:none;padding:0;font-family:inherit;
+  width:100%;padding:8px 0;border-radius:10px;border:none;
+  background:rgba(255,255,255,0.20);color:var(--label-strong);
+  font-size:13px;font-weight:800;letter-spacing:-0.3px;margin-top:auto;
+  font-family:inherit;cursor:pointer;
+  transition:transform .15s, background .15s;
 }
+.b-modal .mir-card:active{transform:scale(0.96)}
 /* 더보기 옵션 텍스트 버튼 */
 .b-more{
   display:flex;align-items:center;justify-content:center;gap:2px;
@@ -1702,15 +1702,6 @@ body.intro-mode .stat-panel{display:none !important}
 }
 .b-more:hover{color:var(--label-normal)}
 .b-more:active{opacity:0.6}
-/* 구매 CTA (primary) */
-.b-buy{
-  width:100%;padding:15px;border-radius:14px;border:none;
-  background:linear-gradient(116deg,var(--primary-normal),var(--primary-heavy));
-  color:#fff;font-family:inherit;font-size:16px;font-weight:800;letter-spacing:-0.3px;
-  cursor:pointer;box-shadow:0 8px 24px rgba(20,195,145,0.3);
-  transition:transform .15s;margin-bottom:10px;
-}
-.b-buy:active{transform:scale(0.98)}
 /* 무제한 구독하기 (광고 보기 대체, secondary) */
 .b-subscribe{
   display:flex;align-items:center;justify-content:center;gap:8px;
@@ -2146,30 +2137,29 @@ body.intro-mode .stat-panel{display:none !important}
     </div>
   </div>
   <div class="mir-grid">
-    <div class="mir-card" onclick="selectBCard(this,'1,200 미르')">
+    <div class="mir-card" onclick="buyMir('1,200 미르')">
       <div class="mir-pile"><img src="./images/store-3.png" alt="1,200 미르"></div>
       <div class="mir-amt">1,200 미르</div>
       <div class="mir-bns">+ 180 보너스</div>
       <button class="mir-pbtn">₩8,800</button>
     </div>
-    <div class="mir-card selected" onclick="selectBCard(this,'4,000 미르')">
+    <div class="mir-card" onclick="buyMir('4,000 미르')">
       <div class="mir-best">BEST</div>
       <div class="mir-pile"><img src="./images/store-4.png" alt="4,000 미르"></div>
       <div class="mir-amt">4,000 미르</div>
       <div class="mir-bns">+ 600 보너스</div>
       <button class="mir-pbtn">₩29,000</button>
     </div>
-    <div class="mir-card" onclick="selectBCard(this,'8,000 미르')">
+    <div class="mir-card" onclick="buyMir('8,000 미르')">
       <div class="mir-pile"><img src="./images/store-5.png" alt="8,000 미르"></div>
       <div class="mir-amt">8,000 미르</div>
       <div class="mir-bns">+ 1,600 보너스</div>
       <button class="mir-pbtn">₩58,000</button>
     </div>
   </div>
-  <button class="b-more" onclick="closeB();openStoreSheet()">더보기 옵션
+  <button class="b-more" onclick="closeB();openStoreSheet()">옵션 더보기
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
   </button>
-  <button class="b-buy" onclick="buyMir(bSelected)">구매하기</button>
   <button class="b-subscribe" onclick="openSubscribe()">
     <span class="b-sub-main">
       <img class="b-sub-icon" src="./images/store-380.png" alt="MAX">
@@ -2631,18 +2621,6 @@ function buyPlan() { openSubscribe(); }
 function buyMir(label) { showToast(curLang === 'en' ? '💎 Buy ' + label + ' (payment coming soon)' : '💎 ' + label + ' 구매 (결제 연동 예정)'); }
 function claimFreeMir() { showToast(curLang === 'en' ? '🎁 Claim free Credits (event page coming soon)' : '🎁 무료 미르 받기 (이벤트 페이지 연동 예정)'); }
 // ═══ 버전 B: 미르 부족 모달 ═══
-let bSelected = '4,000 미르'; // 기본 선택: 가운데(BEST) 카드
-function selectBCard(el, label) {
-  document.querySelectorAll('#bModal .mir-card').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-  bSelected = label;
-  updateBuyLabel();
-}
-function updateBuyLabel() {
-  const btn = document.querySelector('#bModal .b-buy');
-  if (!btn) return;
-  btn.textContent = curLang === 'en' ? ('Buy ' + bSelected) : (bSelected + ' 구매하기');
-}
 function openB() {
   document.body.classList.remove('intro-mode'); // 헤더·입력창 노출
   document.querySelectorAll('.tap-coach').forEach(c => { c.classList.remove('show'); c.setAttribute('hidden', ''); });
@@ -2706,7 +2684,7 @@ const I18N = [
   ['매월 자동 갱신 · 언제든 취소 가능','Auto-renews monthly · Cancel anytime'],
   ['잠깐 있다 올거지?',"You'll come back soon, right?"],
   ['계속하려면 미르를 충전해주세요.','Top up Credits to keep chatting.'],
-  ['더보기 옵션','More options'],
+  ['옵션 더보기','More options'],
   ['>구매하기<','>Buy<'],
   ['무제한 채팅하기','Go Unlimited'],
   ['+12 추가기능 해금','+ 12 features'],
@@ -2723,8 +2701,6 @@ function setLang(lang) {
   const s = document.getElementById('storeSheet'), m = document.getElementById('bModal');
   if (s) s.innerHTML = lang === 'en' ? _applyI18N(_storeKO) : _storeKO;
   if (m) m.innerHTML = lang === 'en' ? _applyI18N(_modalKO) : _modalKO;
-  bSelected = lang === 'en' ? '4,000 Credits' : '4,000 미르';
-  updateBuyLabel();
 }
 // A/B × 언어 스위칭
 function switchVersion(v, lang) {
