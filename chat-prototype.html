@@ -2866,8 +2866,8 @@ function dismissBgmIntro() {
   startDialogueFlow();
 }
 document.addEventListener('DOMContentLoaded', () => {
-  // 진입 시 코치마크를 터치 게이트로 표시 (다이얼로그/bgm은 첫 터치까지 대기)
-  showTapCoach();
+  // 미르충전 A/B 데모: store/모달이 자동 노출되므로 인트로 코치마크 생략
+  // showTapCoach();
 });
 function insertAsterisk() {
   const input = document.querySelector('.input-field');
