@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Mirai — Donation System Prototype</title>
-<link rel="stylesheet" href="shared/styles.css">
+<link rel="stylesheet" href="../shared/styles.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{background:#000}
@@ -137,10 +137,13 @@ body{
   background:rgba(0,0,0,0.2);max-width:200px;overflow:hidden;cursor:pointer;
 }
 .profile-pill .avatar{
-  width:24px;height:24px;border-radius:12px;overflow:hidden;flex-shrink:0;
-  border:1px solid transparent;
+  width:24px;height:24px;border-radius:50%;flex-shrink:0;
+  position:relative;overflow:hidden;
+  background:none !important;
+  border:none !important;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,0.45);
 }
-.profile-pill .avatar img{width:100%;height:100%;object-fit:cover}
+.profile-pill .avatar img{width:100%;height:100%;object-fit:cover;display:block}
 .profile-pill .char-name{
   font-size:12px;color:var(--label-strong);letter-spacing:0.3px;
   max-width:80px;
@@ -216,7 +219,7 @@ body{
   position:absolute;inset:0;z-index:1;
   background-image:url('./images/bg-restaurant.png');
   background-size:cover;background-position:center center;background-repeat:no-repeat;
-  background-color:#0c0f15;
+  background-color:#141416;
 }
 .char-img-overlay{
   position:absolute;inset:0;z-index:2;
@@ -234,6 +237,230 @@ body{
   .char-area{background:transparent !important}
   .char-img{background-size:cover;background-position:center center;background-color:transparent}
   .char-img-overlay{background-size:auto 95%;background-position:center center;background-color:transparent}
+}
+
+/* ═══ MESSENGER 모드 — 메시지 피드 ═══ */
+body.messenger-mode{background:#0a0a0c}
+body.messenger-mode .screen{background:transparent !important}
+body.messenger-mode .header{background:transparent !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important}
+body.messenger-mode .char-area,
+body.messenger-mode .name-row-wrap,
+body.messenger-mode .dlg-tap-area,
+body.messenger-mode .tap-zone-container{display:none !important}
+/* stat-panel은 show 클래스로 토글되게 — display는 그대로 두고 opacity로 제어 */
+body.messenger-mode .stat-panel:not(.show){opacity:0;pointer-events:none;transform:translateY(-8px)}
+body.messenger-mode .top-gradient{display:none !important}
+
+/* 풀뷰포트 배경 (미연시 UI와 동일 패턴) */
+.chat-bg{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:url('./images/kennedy-bg.webp');
+  background-size:cover;background-position:center center;
+}
+.chat-bg::after{
+  content:'';position:absolute;inset:0;
+  background:rgba(10,10,12,0.55);
+}
+body.messenger-mode .desktop-blur{display:none}
+
+.chat-feed{
+  position:absolute;left:0;right:0;
+  top:max(56px, env(safe-area-inset-top));
+  bottom:0;
+  z-index:1;
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:24px 16px max(180px, calc(env(safe-area-inset-bottom) + 160px));
+  display:flex;flex-direction:column;gap:12px;
+  scrollbar-width:none;
+}
+.chat-feed::-webkit-scrollbar{display:none}
+@media (min-width:431px){
+  .chat-feed{padding-left:24px;padding-right:24px}
+}
+@media (min-width:769px){
+  .chat-feed{max-width:696px;margin:0 auto;left:0;right:0;padding-top:32px}
+}
+@media (min-width:1024px){
+  .chat-feed{max-width:940px}
+}
+
+/* 시간 헤더 */
+.msg-time{
+  align-self:center;
+  font-size:13px;color:rgba(255,255,255,0.6);font-weight:500;
+  letter-spacing:-0.1px;
+  margin:12px 0;
+}
+
+/* 내레이션 버블 — 헤더 없는 흐린 그레이 텍스트 (bg는 동일 솔리드) */
+.msg-char .msg-bubble.msg-narration{
+  background:rgba(28,28,30,0.9);
+  color:rgba(255,255,255,0.5);
+  font-size:14px;
+}
+
+/* 메시지 컨테이너 */
+.msg{max-width:520px}
+@media (min-width:769px){.msg{max-width:600px}}
+@media (min-width:1024px){.msg{max-width:720px}}
+.msg-char{align-self:flex-start}
+.msg-user{align-self:flex-end}
+
+.msg-stack{display:flex;flex-direction:column;gap:4px;min-width:0;align-items:flex-start}
+.msg-user .msg-stack{align-items:flex-end}
+
+/* 헤더 행 (아바타 + 이름) */
+.msg-header{
+  display:flex;align-items:center;gap:8px;
+  padding:0 2px 2px;
+}
+.msg-avatar{
+  width:28px;height:28px;border-radius:50%;
+  object-fit:cover;flex-shrink:0;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,0.35);
+}
+
+/* 버블 공통 */
+.msg-bubble{
+  padding:13px 16px;border-radius:18px;
+  font-size:15px;line-height:1.55;letter-spacing:-0.2px;
+  overflow-wrap:break-word;
+  width:fit-content;max-width:100%;
+}
+/* 캐릭터 버블 — 다크 그레이 */
+.msg-char .msg-bubble{
+  background:rgba(28,28,30,0.9);color:#fff;
+}
+/* 답장 제안 / 유저 — 크림 */
+.msg-user .msg-bubble{
+  background:rgba(255,255,255,0.76);color:#1a1a1c;
+}
+/* 내레이션(액션) 부분 — 흐린 회색 */
+.msg-bubble .narr{color:rgba(255,255,255,0.5)}
+.msg-user .msg-bubble .narr{color:rgba(26,26,28,0.5)}
+
+/* 타이핑 커서 (AI 답장) */
+.msg-cursor{
+  display:inline-block;width:2px;height:1em;
+  background:rgba(255,255,255,0.75);margin-left:2px;
+  vertical-align:text-bottom;
+  animation:msgCursorBlink 0.85s steps(2,start) infinite;
+}
+@keyframes msgCursorBlink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* 타이핑 인디케이터 */
+.msg-bubble.msg-typing{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:14px 16px;
+}
+.msg-bubble.msg-typing span{
+  width:7px;height:7px;border-radius:50%;
+  background:rgba(255,255,255,0.55);
+  animation:typingDot 1.2s ease-in-out infinite;
+}
+.msg-bubble.msg-typing span:nth-child(2){animation-delay:0.15s}
+.msg-bubble.msg-typing span:nth-child(3){animation-delay:0.3s}
+@keyframes typingDot{
+  0%,100%{transform:translateY(0);opacity:0.4}
+  50%{transform:translateY(-3px);opacity:1}
+}
+
+/* 캐릭터 버블 액션 (수정/신고) — 오른쪽 정렬 */
+.msg-actions{
+  align-self:flex-end;
+  display:flex;gap:4px;margin-top:4px;padding-right:4px;
+  opacity:0.55;transition:opacity 0.15s ease;
+}
+.msg-stack:hover .msg-actions{opacity:1}
+.msg-action{
+  width:26px;height:26px;border-radius:6px;border:none;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.7);
+  transition:background 0.15s ease, color 0.15s ease;
+}
+.msg-action:hover{background:rgba(255,255,255,0.14);color:#fff}
+.msg-action:active{transform:scale(0.94)}
+.msg-action svg{width:13px;height:13px}
+
+/* 답장 제안 */
+.msg-suggest-wrap{
+  align-self:flex-end;
+  display:flex;flex-direction:column;align-items:flex-end;gap:8px;
+  max-width:78%;margin:6px 0 4px;
+  opacity:0;transform:translateY(6px);
+  animation:suggestFadeIn 0.45s ease-out forwards;
+}
+@keyframes suggestFadeIn{
+  to{opacity:1;transform:translateY(0)}
+}
+.msg-suggest-hint{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:13px;color:rgba(255,255,255,0.78);
+  margin:0 4px 4px;
+}
+.msg-suggest-hint svg{width:14px;height:14px;color:rgba(255,255,255,0.6)}
+.msg-suggest{
+  display:block;text-align:left;
+  padding:12px 16px;border-radius:18px;border-bottom-right-radius:6px;
+  border:none;cursor:pointer;
+  background:rgba(255,255,255,0.76);color:#1a1a1c;
+  font-family:inherit;font-size:14.5px;line-height:1.5;letter-spacing:-0.15px;
+  max-width:100%;
+  transition:transform 0.12s ease, opacity 0.12s ease;
+}
+.msg-suggest:hover{transform:translateY(-1px)}
+.msg-suggest:active{transform:scale(0.98);opacity:0.9}
+
+/* 이미지 버블 — 4:5 비율 카드 + 페이드인 */
+.msg-img{
+  position:relative;width:200px;max-width:100%;
+  aspect-ratio:4/5;
+  border-radius:14px;overflow:hidden;
+  background:rgba(28,28,30,0.9);
+  opacity:0;animation:imgFadeIn 0.55s ease-out forwards;
+}
+@keyframes imgFadeIn{to{opacity:1}}
+.msg-img img{display:block;width:100%;height:100%;object-fit:cover;object-position:center top}
+
+/* 잠긴 이미지 버블 */
+.msg-img.locked{cursor:pointer}
+.msg-img.locked .msg-img-cover{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  background:linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.7) 100%);
+  color:#fff;text-align:center;
+}
+.msg-img-lock-icon{
+  width:40px;height:40px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#14C391,#3D8FF5);
+}
+.msg-img-lock-icon svg{width:20px;height:20px;color:#fff}
+.msg-img-cover-text{
+  font-size:13px;font-weight:600;letter-spacing:-0.1px;
+}
+.msg-img-cta{
+  display:inline-flex;align-items:center;gap:6px;
+  height:34px;padding:0 14px;border-radius:999px;
+  background:rgba(255,255,255,0.92);
+  color:#1a1a1c;font-size:13px;font-weight:700;letter-spacing:-0.1px;
+  cursor:pointer;border:none;
+}
+.msg-img-cta img{width:14px;height:14px;object-fit:contain}
+.msg-img:not(.locked) .msg-img-cover{display:none}
+
+/* 메신저 bottom panel — 배경 X (full-screen이라 채팅 가림) */
+body.messenger-mode .bottom{
+  background:none;
+  pointer-events:none;
+}
+body.messenger-mode .bottom > *{pointer-events:auto}
+/* 입력창 뒤로 짧은 페이드 (높이 작게) */
+body.messenger-mode .bottom-gradient{
+  display:block !important;
+  height:140px;
+  background:linear-gradient(0deg, rgba(10,10,12,0.95) 0%, rgba(10,10,12,0.6) 55%, transparent 100%);
+  z-index:48;
 }
 
 /* ═══ BOTTOM GRADIENT ═══ */
@@ -484,6 +711,14 @@ body{
 }
 .progress-label{font-size:13px;color:var(--label-alternative);font-weight:400}
 .progress-label .progress-count{color:var(--label-strong)}
+.user-persona-label{display:inline-flex;align-items:center;gap:6px}
+.user-persona-label .persona-avatar{
+  width:18px;height:18px;border-radius:50%;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);
+}
+.user-persona-label .persona-avatar svg{width:12px;height:12px}
+.user-persona-label .persona-name{font-weight:500;color:rgba(255,255,255,0.55)}
 .progress-icons{
   display:flex;align-items:center;gap:16px;
   margin-left:auto;
@@ -752,7 +987,6 @@ body.intro-mode .stat-panel{display:none !important}
   display:flex;align-items:center;justify-content:center;
   cursor:pointer;
   opacity:1;transition:opacity 0.6s ease;
-  display:none; /* 사운드 포함 안내 비표시 */
 }
 .bgm-intro.hide{opacity:0;pointer-events:none}
 .bgm-intro-inner{
@@ -1380,408 +1614,18 @@ body.intro-mode .stat-panel{display:none !important}
   background:transparent;
 }
 .content-detail-frame[hidden]{display:none}
-
-/* ═══ 상품 구매 BOTTOM SHEET ═══ */
-.store-backdrop{position:fixed;inset:0;z-index:355;background:rgba(0,0,0,0.34);opacity:0;pointer-events:none;transition:opacity .32s ease}
-.store-backdrop.show{opacity:1;pointer-events:auto}
-.store-sheet{
-  position:fixed;left:0;right:0;bottom:0;z-index:360;
-  margin:0 auto;width:100%;
-  background:rgba(24,25,28,0.66);
-  -webkit-backdrop-filter:blur(30px) saturate(1.4);backdrop-filter:blur(30px) saturate(1.4);
-  border-radius:24px 24px 0 0;
-  border-top:1px solid rgba(255,255,255,0.12);
-  box-shadow:0 -4px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
-  transform:translateY(100%);
-  transition:transform .42s cubic-bezier(.16,1,.3,1);
-  display:flex;flex-direction:column;max-height:72dvh;
-}
-.store-sheet.show{transform:translateY(0)}
-@media (min-width:431px){ .store-sheet{ max-width:696px; max-height:66vh } }
-.ss-grabber{width:40px;height:4px;border-radius:2px;background:rgba(255,255,255,0.20);margin:10px auto 0;flex-shrink:0}
-.ss-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 16px calc(28px + env(safe-area-inset-bottom))}
-/* 연/월 토글 — plan-card 안 최상단 */
-#storeSheet .period-pill-wrap{display:flex;justify-content:flex-start;margin:0 0 14px;position:relative;z-index:1}
-#storeSheet .period-pill{display:inline-flex;padding:3px;background:rgba(255,255,255,0.10);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:999px;gap:2px}
-#storeSheet .pp-seg{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:none;background:transparent;border-radius:999px;font-family:inherit;font-size:12px;font-weight:700;color:var(--label-alternative);cursor:pointer;transition:all .2s;white-space:nowrap}
-#storeSheet .pp-seg:active{transform:scale(0.97)}
-#storeSheet .pp-seg.active{background:var(--primary-normal);color:#fff;box-shadow:0 2px 8px rgba(20,195,145,0.32)}
-#storeSheet .pp-badge{font-size:10px;font-weight:800;padding:2px 6px;border-radius:999px;background:linear-gradient(135deg,#ff8a3d,#ff5a4a);color:#fff;letter-spacing:0.1px;box-shadow:0 1px 3px rgba(255,90,74,0.3)}
-/* MAX 카드 (store-v2 .plan-card 참고) */
-#storeSheet .plan-card{margin:0 0 18px;padding:22px 22px 18px;border-radius:20px;position:relative;overflow:hidden;background:linear-gradient(160deg, #2b2c30 0%, #1f2024 100%);border:1px solid rgba(255,255,255,0.06);box-shadow:0 6px 18px rgba(0,0,0,0.32), 0 1px 0 rgba(255,255,255,0.06) inset}
-#storeSheet .plan-card::after{content:'';position:absolute;right:-30px;top:-50px;width:220px;height:220px;background:url('./images/store-max.png') no-repeat center;background-size:contain;opacity:0.08;pointer-events:none}
-#storeSheet .plan-top{display:flex;align-items:center;gap:8px;margin-bottom:4px;position:relative;z-index:1}
-#storeSheet .plan-icon{width:28px;height:28px;object-fit:contain}
-#storeSheet .plan-name{font-size:22px;font-weight:900;color:var(--label-strong);letter-spacing:-0.5px}
-#storeSheet .plan-discount{display:inline-block;padding:3px 9px;border-radius:6px;background:linear-gradient(135deg,#ff8a3d,#ff5a4a);font-size:11px;font-weight:800;color:#fff;letter-spacing:0.3px;box-shadow:0 2px 8px rgba(255,90,74,0.3);margin-left:4px}
-#storeSheet .plan-pricing{position:relative;z-index:1;margin-bottom:20px;display:flex;flex-direction:row;align-items:baseline;gap:10px;flex-wrap:nowrap}
-#storeSheet .price-original{font-size:13px;font-weight:600;color:var(--label-alternative);text-decoration:line-through}
-#storeSheet .price-main{font-size:26px;font-weight:900;color:var(--label-strong);letter-spacing:-0.8px;line-height:1.1}
-#storeSheet .price-main small{font-size:14px;font-weight:600;color:var(--label-neutral);letter-spacing:0;margin-left:2px}
-#storeSheet .price-hidden{display:none !important}
-#storeSheet .plan-features{display:flex;flex-direction:column;gap:12px;position:relative;z-index:1;list-style:none;margin:0;padding:0}
-#storeSheet .feat{display:flex;align-items:center;gap:12px}
-#storeSheet .feat-icon{width:34px;height:34px;border-radius:9px;background:rgba(20,195,145,0.10);border:1px solid rgba(20,195,145,0.18);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--primary-normal)}
-#storeSheet .feat-icon svg{width:17px;height:17px}
-#storeSheet .feat-text{flex:1;font-size:15px;font-weight:600;color:var(--label-normal);letter-spacing:-0.2px;line-height:1.35;word-break:keep-all}
-#storeSheet .feat-check{width:20px;height:20px;color:var(--primary-normal);flex-shrink:0}
-/* CTA */
-#storeSheet .cta{position:relative;z-index:1;margin-top:18px;width:100%;padding:16px;border-radius:14px;border:none;background:linear-gradient(116deg,var(--primary-normal),var(--primary-heavy));font-family:inherit;font-size:16px;font-weight:800;color:#fff;cursor:pointer;transition:all .2s;box-shadow:0 8px 24px rgba(20,195,145,0.3);letter-spacing:-0.3px}
-#storeSheet .cta:active{transform:scale(0.98)}
-#storeSheet .cta-note{text-align:center;font-size:12px;font-weight:500;color:var(--label-alternative);margin-top:12px}
-/* 미르 구매 그리드 (store 카드 참고) */
-#storeSheet .mir-sec{margin:24px 0 12px}
-#storeSheet .mir-sec-top{margin:14px 0 12px}
-#storeSheet .mir-sec h3{font-size:18px;font-weight:800;color:var(--label-strong);margin:0}
-/* ═══ 시트 위 프리미엄 프로모 배너 ═══ */
-.store-banner{
-  position:absolute;
-  top:-64px;
-  left:16px;right:16px;
-  height:56px;
-  border-radius:14px;
-  padding:6px 10px 6px 14px;
-  display:flex;align-items:center;gap:10px;
-  background:linear-gradient(95deg, #0c2a2a 0%, #0e4540 38%, #136f60 70%, #1a8b75 100%);
-  box-shadow:
-    0 12px 32px rgba(0,0,0,0.5),
-    0 0 0 1px rgba(255,255,255,0.06) inset,
-    0 1px 0 rgba(255,255,255,0.18) inset;
-  overflow:hidden;
-  /* iOS Safari: 부모(.store-sheet)가 transform 갖고 있어서 overflow:hidden + border-radius 안 먹는 버그 — clip-path로 강제 클리핑 */
-  clip-path:inset(0 round 14px);
-  pointer-events:auto;
-  cursor:pointer;
-  isolation:isolate;
-}
-/* 배경 이미지 — 우측에 옅게 깔리는 데코 */
-.store-banner::before{
-  content:'';
-  position:absolute;
-  top:0;right:0;bottom:0;
-  width:65%;
-  background:url('./images/banner-bg.png') right center / cover no-repeat;
-  opacity:0.2;
-  pointer-events:none;
-  z-index:0;
-  border-radius:0 16px 16px 0;
-}
-
-.store-banner-icon{
-  width:68px;height:56px;flex-shrink:0;
-  display:flex;align-items:center;justify-content:flex-start;
-  position:relative;z-index:2;
-  margin:0 0 0 -14px;
-}
-.store-banner-icon img{
-  width:100%;height:100%;
-  object-fit:cover;object-position:left center;
-  filter:
-    drop-shadow(0 4px 8px rgba(20,195,145,0.55))
-    drop-shadow(0 0 12px rgba(123,229,238,0.4));
-}
-
-.store-banner-text{flex:1;min-width:0;position:relative;z-index:2}
-.store-banner-title{
-  font-size:14px;font-weight:800;color:#fff;
-  line-height:1.25;letter-spacing:-0.3px;
-}
-.store-banner-sub{
-  font-size:11px;font-weight:700;
-  color:#FFE08A;
-  margin-top:2px;letter-spacing:-0.1px;
-}
-
-.store-banner-cta{
-  position:relative;z-index:2;
-  padding:9px 16px;border:none;border-radius:10px;
-  background:linear-gradient(135deg,#FF8A6E 0%,#FF6B5E 100%);
-  font-family:inherit;font-size:13px;font-weight:600;
-  color:#fff;cursor:pointer;letter-spacing:-0.2px;
-  white-space:nowrap;
-  box-shadow:0 4px 14px rgba(255,90,74,0.45), 0 1px 0 rgba(255,255,255,0.35) inset;
-  transition:transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s;
-  overflow:hidden;
-}
-.store-banner-cta:hover{
-  box-shadow:0 6px 18px rgba(255,90,74,0.55), 0 1px 0 rgba(255,255,255,0.45) inset;
-}
-.store-banner-cta:active{transform:scale(0.96)}
-#storeSheet .mir-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
-#storeSheet .mir-card{
-  position:relative;
-  border-radius:16px;
-  padding:8px 6px 10px;
-  display:flex;flex-direction:column;align-items:center;
-  cursor:pointer;
-  background:
-    radial-gradient(ellipse 46px 20px at 50% 60px, rgba(20,195,145,0.10), transparent 80%),
-    radial-gradient(ellipse 80px 40px at 50% 100%, rgba(40,208,237,0.07), transparent 70%),
-    linear-gradient(160deg, #2b2c30 0%, #1f2024 100%);
-  border:1px solid rgba(255,255,255,0.06);
-  box-shadow:0 6px 18px rgba(0,0,0,0.32), 0 1px 0 rgba(255,255,255,0.06) inset;
-  isolation:isolate;
-  transition:transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .25s, border-color .25s;
-}
-#storeSheet .mir-card::before{
-  content:'';position:absolute;inset:0;
-  background:
-    radial-gradient(circle 1px at 18% 18%, rgba(255,255,255,0.5), transparent 70%),
-    radial-gradient(circle 1px at 76% 24%, rgba(123,229,238,0.55), transparent 70%),
-    radial-gradient(circle 1px at 88% 60%, rgba(20,195,145,0.55), transparent 70%),
-    radial-gradient(circle 1px at 26% 72%, rgba(255,255,255,0.4), transparent 70%);
-  pointer-events:none;
-  opacity:0.85;
-  z-index:0;
-  animation:mirCardTwinkle 2.6s ease-in-out infinite alternate;
-}
-@keyframes mirCardTwinkle{
-  0%{opacity:0.55}
-  100%{opacity:1}
-}
-#storeSheet .mir-card:active{transform:scale(0.96)}
-#storeSheet .mir-badge{
-  position:absolute;top:-8px;right:6px;
-  padding:3px 9px;border-radius:999px;
-  font-size:10px;font-weight:900;color:#fff;
-  background:linear-gradient(135deg,var(--primary-normal),#1ae0a8);
-  box-shadow:0 4px 12px rgba(20,195,145,0.45), 0 0 0 1.5px rgba(255,255,255,0.12) inset;
-  white-space:nowrap;
-  z-index:3;
-  letter-spacing:-0.2px;
-}
-#storeSheet .mir-pile{
-  position:relative;z-index:2;
-  height:60px;
-  display:flex;align-items:center;justify-content:center;
-  margin-bottom:4px;
-}
-#storeSheet .mir-pile img{
-  max-height:56px;width:auto;object-fit:contain;
-  filter:
-    drop-shadow(0 0 5px rgba(26,224,168,0.34))
-    drop-shadow(0 0 12px rgba(20,195,145,0.22))
-    drop-shadow(0 0 20px rgba(20,195,145,0.11));
-  animation:gemFloat 3s ease-in-out infinite;
-}
-@keyframes gemFloat{
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-2.5px)}
-}
-#storeSheet .mir-card:nth-child(2) .mir-pile img{animation-delay:0.4s}
-#storeSheet .mir-card:nth-child(3) .mir-pile img{animation-delay:0.8s}
-#storeSheet .mir-card:nth-child(4) .mir-pile img{animation-delay:0.2s}
-#storeSheet .mir-card:nth-child(5) .mir-pile img{animation-delay:0.6s}
-#storeSheet .mir-card:nth-child(6) .mir-pile img{animation-delay:1.0s}
-@media (prefers-reduced-motion: reduce){
-  #storeSheet .mir-pile img,
-  #storeSheet .mir-card::before{animation:none}
-}
-#storeSheet .mir-amt{
-  position:relative;z-index:2;
-  font-size:13px;font-weight:800;color:var(--label-strong);
-  margin-bottom:0;letter-spacing:-0.3px;
-}
-#storeSheet .mir-bns{
-  position:relative;z-index:2;
-  font-size:10px;font-weight:800;color:var(--primary-normal);
-  margin-bottom:9px;min-height:12px;
-  text-shadow:0 0 6px rgba(20,195,145,0.4);
-  letter-spacing:-0.2px;
-}
-#storeSheet .mir-pbtn{
-  position:relative;z-index:2;
-  width:100%;padding:9px 0;
-  border-radius:10px;border:none;
-  background:rgba(255,255,255,0.20);
-  color:var(--label-strong);
-  font-size:13px;font-weight:800;
-  font-family:inherit;cursor:pointer;
-  margin-top:auto;letter-spacing:-0.3px;
-  transition:transform .15s, background .15s;
-}
-@media (hover:hover){#storeSheet .mir-pbtn:hover{background:rgba(255,255,255,0.27)}}
-#storeSheet .mir-pbtn:active{transform:scale(0.96)}
-#storeSheet .mir-pbtn:active{transform:scale(0.96)}
-/* ═══ VERSION B: 미르 부족 모달 ═══ */
-.b-backdrop{position:fixed;inset:0;z-index:358;background:rgba(0,0,0,0.5);opacity:0;pointer-events:none;transition:opacity .3s ease}
-.b-backdrop.show{opacity:1;pointer-events:auto}
-.b-modal{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(14px);z-index:362;width:calc(100% - 32px);max-width:392px;max-height:74vh;overflow-y:auto;-webkit-overflow-scrolling:touch;background:rgba(24,25,28,0.62);-webkit-backdrop-filter:blur(30px) saturate(1.4);backdrop-filter:blur(30px) saturate(1.4);border:1px solid rgba(255,255,255,0.12);border-radius:24px;padding:22px 18px 18px;box-shadow:0 24px 64px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.08);opacity:0;pointer-events:none;transition:opacity .3s ease, transform .34s cubic-bezier(.16,1,.3,1)}
-.b-modal.show{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
-/* 모달 항상 화면 정중앙 (모바일·데스크탑 공통) */
-.b-modal.centered{top:50%;bottom:auto !important;max-height:84vh;transform:translate(-50%,-50%) scale(0.98)}
-.b-modal.centered.show{transform:translate(-50%,-50%) scale(1)}
-@media (min-width:431px){ .b-modal{max-width:412px} }
-/* 구독 풀스크린 오버레이 */
-.sub-overlay{position:fixed;inset:0;z-index:2000;background:var(--bg-alternative);
-  transform:translateY(100%);transition:transform .42s cubic-bezier(.16,1,.3,1);
-  will-change:transform}
-.sub-overlay.show{transform:translateY(0)}
-.sub-overlay iframe{width:100%;height:100%;border:none;display:block;background:var(--bg-alternative)}
-.sub-overlay-close{position:fixed;top:max(12px,env(safe-area-inset-top));right:14px;z-index:2001;
-  width:36px;height:36px;border:none;border-radius:50%;
-  background:rgba(0,0,0,0.45);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
-  color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;
-  transition:background .15s, transform .15s}
-.sub-overlay-close:hover{background:rgba(0,0,0,0.62)}
-.sub-overlay-close:active{transform:scale(0.92)}
-.sub-overlay-close svg{width:18px;height:18px}
-.b-close{position:fixed;z-index:363;width:36px;height:36px;border:none;border-radius:50%;
-  background:rgba(0,0,0,0.45);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
-  color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;
-  opacity:0;pointer-events:none;transform:scale(0.9);
-  transition:opacity .2s ease, transform .2s ease, background .15s}
-.b-close.show{opacity:1;pointer-events:auto;transform:scale(1)}
-.b-close:hover{background:rgba(0,0,0,0.6)}
-.b-close:active{transform:scale(0.92)}
-.b-close svg{width:18px;height:18px}
-.b-hook{display:flex;gap:12px;align-items:center;margin-bottom:18px;padding-right:24px}
-.b-hook-avatar{width:76px;height:76px;border-radius:50%;overflow:hidden;flex-shrink:0;border:1.5px solid rgba(255,255,255,0.25)}
-.b-hook-avatar img{width:100%;height:100%;object-fit:cover}
-.b-hook-body{flex:1;min-width:0;padding-top:2px}
-.b-hook-bubble{display:inline-block;background:var(--fill-alternative);color:var(--label-strong);padding:9px 13px;border-radius:13px;border-bottom-left-radius:4px;font-size:14px;font-weight:500;margin-bottom:8px}
-.b-hook-narr{font-size:14px;color:var(--label-neutral);line-height:1.55}
-/* ═══ VERSION B 리디자인: 미르 카드 그리드 (store 카드 UI 재사용) ═══ */
-.b-modal .mir-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
-.b-modal .mir-card{
-  position:relative;border-radius:16px;padding:8px 6px 12px;
-  display:flex;flex-direction:column;align-items:center;cursor:pointer;
-  background:
-    radial-gradient(ellipse 46px 20px at 50% 60px, rgba(20,195,145,0.10), transparent 80%),
-    radial-gradient(ellipse 80px 40px at 50% 100%, rgba(40,208,237,0.07), transparent 70%),
-    linear-gradient(160deg, #2b2c30 0%, #1f2024 100%);
-  border:1.5px solid rgba(255,255,255,0.06);
-  box-shadow:0 6px 18px rgba(0,0,0,0.32), 0 1px 0 rgba(255,255,255,0.06) inset;
-  isolation:isolate;
-  transition:transform .18s cubic-bezier(.34,1.56,.64,1), border-color .2s, box-shadow .2s;
-}
-.b-modal .mir-card:active{transform:scale(0.96)}
-.b-modal .mir-badge{
-  position:absolute;top:-8px;right:6px;padding:3px 9px;border-radius:999px;
-  font-size:10px;font-weight:900;color:#fff;
-  background:linear-gradient(135deg,var(--primary-normal),#1ae0a8);
-  box-shadow:0 4px 12px rgba(20,195,145,0.45), 0 0 0 1.5px rgba(255,255,255,0.12) inset;
-  white-space:nowrap;z-index:3;letter-spacing:-0.2px;
-}
-.b-modal .mir-best{
-  position:absolute;top:-9px;left:50%;transform:translateX(-50%);
-  padding:3px 12px;border-radius:999px;
-  font-size:10px;font-weight:900;color:#fff;letter-spacing:0.4px;
-  background:linear-gradient(135deg,#ff8a3d,#ff5a4a);
-  box-shadow:0 4px 12px rgba(255,90,74,0.45);
-  white-space:nowrap;z-index:4;
-}
-.b-modal .mir-pile{height:60px;display:flex;align-items:center;justify-content:center;margin-bottom:4px}
-.b-modal .mir-pile img{max-height:56px;width:auto;object-fit:contain;
-  filter:
-    drop-shadow(0 0 5px rgba(26,224,168,0.34))
-    drop-shadow(0 0 12px rgba(20,195,145,0.22))
-    drop-shadow(0 0 20px rgba(20,195,145,0.11));
-  animation:gemFloat 3s ease-in-out infinite;
-}
-.b-modal .mir-card:nth-child(2) .mir-pile img{animation-delay:0.4s}
-.b-modal .mir-card:nth-child(3) .mir-pile img{animation-delay:0.8s}
-@media (prefers-reduced-motion:reduce){.b-modal .mir-pile img{animation:none}}
-.b-modal .mir-amt{font-size:13px;font-weight:800;color:var(--label-strong);letter-spacing:-0.3px}
-.b-modal .mir-bns{font-size:10px;font-weight:800;color:var(--primary-normal);min-height:12px;margin-bottom:10px;letter-spacing:-0.2px;text-shadow:0 0 6px rgba(20,195,145,0.4)}
-.b-modal .mir-pbtn{
-  width:100%;padding:8px 0;border-radius:10px;border:none;
-  background:rgba(255,255,255,0.20);color:var(--label-strong);
-  font-size:13px;font-weight:800;letter-spacing:-0.3px;margin-top:auto;
-  font-family:inherit;cursor:pointer;
-  transition:transform .15s, background .15s;
-}
-.b-modal .mir-card:active{transform:scale(0.96)}
-/* 더보기 옵션 텍스트 버튼 */
-.b-more{
-  display:flex;align-items:center;justify-content:center;gap:2px;
-  margin:0 auto 16px;padding:6px 12px;border:none;background:none;
-  color:var(--label-alternative);font-family:inherit;font-size:13px;font-weight:600;
-  cursor:pointer;transition:color .15s;
-}
-.b-more:hover{color:var(--label-normal)}
-.b-more:active{opacity:0.6}
-/* 무제한 구독하기 (광고 보기 대체, secondary) */
-.b-subscribe{
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  width:100%;height:52px;border-radius:14px;overflow:hidden;
-  border:1px solid rgba(255,255,255,0.10);background:var(--fill-normal);
-  color:var(--label-strong);font-family:inherit;
-  cursor:pointer;transition:transform .15s, background .15s;
-}
-.b-subscribe:active{transform:scale(0.98);background:var(--fill-strong)}
-.b-sub-icon{width:20px;height:20px;object-fit:contain;flex-shrink:0}
-.b-sub-main{display:flex;align-items:center;gap:8px;flex-shrink:0}
-.b-sub-label{font-size:15px;font-weight:700;letter-spacing:-0.3px;white-space:nowrap}
-.b-sub-badge{
-  flex-shrink:0;padding:3px 8px;border-radius:999px;
-  background:rgba(20,195,145,0.16);color:var(--primary-normal);
-  font-size:11px;font-weight:500;letter-spacing:-0.2px;white-space:nowrap;
-}
-/* ═══ VERSION C: 메모리 가득참 모달 ═══ */
-.mem-cta{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:15px;border-radius:14px;border:none;
-  background:linear-gradient(116deg,var(--primary-normal),var(--primary-heavy));
-  color:#fff;font-family:inherit;font-size:16px;font-weight:800;letter-spacing:-0.3px;
-  cursor:pointer;box-shadow:0 8px 24px rgba(20,195,145,0.3);transition:transform .15s;margin-bottom:6px}
-.mem-cta:active{transform:scale(0.98)}
-.mem-cta img{width:20px;height:20px;object-fit:contain}
-.mem-later{display:block;width:100%;padding:10px;border:none;background:none;color:var(--label-alternative);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer}
-.mem-later:active{opacity:0.6}
-/* ═══ VERSION D: 메모리 부족 인라인 알림 배너 (탑바 하단) ═══ */
-.mem-notice{
-  position:fixed;z-index:55;
-  top:calc(max(8px, env(safe-area-inset-top)) + 50px);
-  left:12px;right:12px;max-width:430px;margin:0 auto;
-  background:rgba(34,35,38,0.92);
-  -webkit-backdrop-filter:blur(20px) saturate(1.2);backdrop-filter:blur(20px) saturate(1.2);
-  border:1px solid rgba(255,255,255,0.09);
-  border-radius:16px;padding:13px 14px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.45);
-  opacity:0;transform:translateY(-14px);pointer-events:none;
-  transition:opacity .3s ease, transform .38s cubic-bezier(.16,1,.3,1);
-}
-.mem-notice.show{opacity:1;transform:translateY(0);pointer-events:auto}
-@media (min-width:431px){ .mem-notice{left:0;right:0;max-width:560px} }
-.mn-top{display:flex;align-items:center;gap:8px;margin-bottom:12px}
-.mn-warn-ico{width:18px;height:18px;flex-shrink:0;color:var(--status-cautionary)}
-.mn-title{flex:1;min-width:0;font-size:13px;font-weight:700;color:var(--label-strong);letter-spacing:-0.2px}
-.mn-x{width:24px;height:24px;border:none;background:none;color:var(--label-alternative);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0}
-.mn-x:active{opacity:0.6}
-.mn-x svg{width:15px;height:15px}
-.mn-gauge{display:flex;align-items:center;gap:9px;margin-bottom:12px}
-.mn-edge{font-size:11px;font-weight:600;color:var(--label-alternative);flex-shrink:0}
-.mn-edge.hi{color:var(--primary-normal);font-weight:700}
-.mn-bar{flex:1;height:8px;border-radius:999px;background:rgba(255,255,255,0.10);overflow:hidden}
-.mn-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#ffa938,#ff6363);box-shadow:0 0 8px rgba(255,99,99,0.4)}
-.mn-cta{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:11px;border-radius:11px;border:none;
-  background:linear-gradient(116deg,var(--primary-normal),var(--primary-heavy));color:#fff;
-  font-family:inherit;font-size:14px;font-weight:800;letter-spacing:-0.3px;cursor:pointer;
-  box-shadow:0 4px 14px rgba(20,195,145,0.28);transition:transform .15s}
-.mn-cta:active{transform:scale(0.98)}
-.mn-cta img{width:17px;height:17px;object-fit:contain}
-/* ═══ A/B 버전 토글 (데모) ═══ */
-.ver-toggle{position:fixed;bottom:max(10px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-wrap:wrap;justify-content:center;gap:2px;row-gap:2px;max-width:calc(100vw - 10px);padding:3px;background:rgba(0,0,0,0.5);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:18px;border:1px solid rgba(255,255,255,0.14);box-shadow:0 4px 16px rgba(0,0,0,0.4)}
-.ver-seg{border:none;background:transparent;cursor:pointer;font-family:inherit;padding:4px 8px;border-radius:999px;font-size:10px;font-weight:700;color:var(--label-alternative);transition:all .18s;white-space:nowrap}
-.ver-seg.active{background:var(--primary-normal);color:#fff}
 </style>
 </head>
-<body class="intro-mode">
-<!-- A/B × 언어 토글 -->
-<div class="ver-toggle">
-  <button class="ver-seg active" data-ver="a" data-lang="ko" onclick="switchVersion('a','ko')">미르A</button>
-  <button class="ver-seg" data-ver="b" data-lang="ko" onclick="switchVersion('b','ko')">미르B</button>
-  <button class="ver-seg" data-ver="a" data-lang="en" onclick="switchVersion('a','en')">미르A EN</button>
-  <button class="ver-seg" data-ver="b" data-lang="en" onclick="switchVersion('b','en')">미르B EN</button>
-  <button class="ver-seg" data-ver="c" data-lang="ko" onclick="switchVersion('c','ko')">메모리</button>
-  <button class="ver-seg" data-ver="c" data-lang="en" onclick="switchVersion('c','en')">메모리 EN</button>
-  <button class="ver-seg" data-ver="d" data-lang="ko" onclick="switchVersion('d','ko')">메모리바</button>
-  <button class="ver-seg" data-ver="d" data-lang="en" onclick="switchVersion('d','en')">메모리바 EN</button>
-</div>
+<body class="messenger-mode">
+<div class="chat-bg"></div>
 <div class="screen" id="app">
   <div class="desktop-blur"></div>
   <div class="top-gradient"></div>
 
-  <div class="tap-zone-container">
+  <!-- 메시지 피드 -->
+  <div class="chat-feed" id="chatFeed"></div>
+
+  <div class="tap-zone-container" style="display:none">
     <div class="dlg-tap-zone left" onclick="prevDialogue(event)"></div>
     <div class="ui-toggle-zone" onclick="toggleUI()"></div>
     <div class="dlg-tap-zone right" onclick="nextDialogue(event)"></div>
@@ -1796,9 +1640,9 @@ body.intro-mode .stat-panel{display:none !important}
       </button>
       <div class="profile-pill" onclick="openContentDetail()">
         <div class="avatar">
-          <img src="./images/char-profile.png" alt="Satoru Gojo">
+          <img src="./images/kennedy-thumb.webp" alt="The Kennedy Brothers">
         </div>
-        <span class="char-name">채무 대신 연애로 받겠습니다.</span>
+        <span class="char-name">The Kennedy Brothers</span>
         <div class="profile-pill-divider" aria-hidden="true"></div>
         <button class="profile-pill-action" type="button" aria-label="댓글" onclick="event.stopPropagation();openContentDetail('comments')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
@@ -1806,7 +1650,7 @@ body.intro-mode .stat-panel{display:none !important}
       </div>
     </div>
     <div class="header-right">
-      <button class="icon-btn" id="chatLogBtn" onclick="showChatLog()" title="대화 로그"><img src="./images/icon/history.svg?v=2" alt="로그" style="width:24px;height:24px"></button>
+      <!-- 로그 아이콘 자리 — 비워둠 -->
       <button class="icon-btn" id="menuToggleBtn" onclick="openSettings()" title="설정"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg></button>
     </div>
   </div>
@@ -1903,7 +1747,12 @@ body.intro-mode .stat-panel{display:none !important}
       </div>
     </div>
     <div class="progress-row">
-      <span class="progress-label">턴 <span class="progress-count">1</span></span>
+      <span class="progress-label user-persona-label">
+        <span class="persona-avatar">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0 2c-4.42 0-8 2.69-8 6v2h16v-2c0-3.31-3.58-6-8-6z"/></svg>
+        </span>
+        <span class="persona-name">BestJjinbbang</span>
+      </span>
       <div class="progress-loading" id="progressLoading" style="display:none">
         <svg class="loading-spark" width="20" height="20" viewBox="0 0 24 24" fill="rgba(194,196,200,0.88)" aria-hidden="true"><path d="M12 2.5c.4 0 .76.27.87.66l1.4 5.05c.13.46.49.82.95.95l5.05 1.4c.39.11.66.47.66.87s-.27.76-.66.87l-5.05 1.4c-.46.13-.82.49-.95.95l-1.4 5.05c-.11.39-.47.66-.87.66s-.76-.27-.87-.66l-1.4-5.05c-.13-.46-.49-.82-.95-.95l-5.05-1.4c-.39-.11-.66-.47-.66-.87s.27-.76.66-.87l5.05-1.4c.46-.13.82-.49.95-.95l1.4-5.05c.11-.39.47-.66.87-.66z"/><circle cx="20" cy="4" r="1"/><circle cx="4" cy="20" r="1"/><circle cx="20" cy="20" r="0.8"/></svg>
         <span class="loading-name">잠시 기다려주세요....</span>
@@ -1911,8 +1760,9 @@ body.intro-mode .stat-panel{display:none !important}
       <div class="progress-icons">
         <button class="prog-icon-btn" id="prevTurnBtn" onclick="confirmUndoTurn()" title="되돌리기"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 010 11H11"/></svg></button>
         <button class="prog-icon-btn" id="statToggleBtn" onclick="toggleStats()" title="스탯 토글"><img id="statToggleIcon" src="./images/icon/chat-bubble.svg?v=7" alt="스탯" style="width:18px;height:18px"></button>
-        <button class="prog-icon-btn" id="dlgEditBtn" onclick="showEditModal()" title="대사 수정"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.15 1.85C10.95 1.05 12.25 1.05 13.05 1.85L14.15 2.95C14.95 3.75 14.95 5.05 14.15 5.85L5.55 14.45C5.35 14.65 5.1 14.75 4.85 14.75H2.25C1.75 14.75 1.35 14.35 1.35 13.85V11.25C1.35 11 1.45 10.75 1.65 10.55L10.15 1.85ZM11.05 2.95C10.75 2.65 10.45 2.65 10.15 2.95L8.95 4.15L11.85 7.05L13.05 5.85C13.35 5.55 13.35 5.25 13.05 4.95L11.05 2.95ZM10.85 8.05L7.95 5.15L2.75 10.35V13.35H5.55L10.85 8.05Z" fill="currentColor" fill-opacity="0.85"/></svg></button>
-        <button class="prog-icon-btn" id="dlgReportBtn" onclick="reportMessage()" title="신고하기" aria-label="신고하기"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18a7 7 0 0 1 14 0"/><line x1="3" y1="18" x2="21" y2="18"/><line x1="12" y1="9" x2="12" y2="2"/><line x1="6" y1="6" x2="7" y2="7"/><line x1="18" y1="6" x2="17" y2="7"/></svg></button>
+        <!-- 메신저 모드에선 버블 액션으로 대체 -->
+        <!-- <button class="prog-icon-btn" id="dlgEditBtn" onclick="showEditModal()" title="대사 수정">...</button>
+        <button class="prog-icon-btn" id="dlgReportBtn" onclick="reportMessage()" title="신고하기">...</button> -->
       </div>
     </div>
     <div class="input-wrap">
@@ -2059,198 +1909,6 @@ body.intro-mode .stat-panel{display:none !important}
   <div class="sheet-spacer"></div>
 </div>
 
-<!-- 상품 구매 바텀시트 -->
-<div class="store-backdrop" id="storeBackdrop" onclick="closeStoreSheet()"></div>
-<div class="store-sheet" id="storeSheet" role="dialog" aria-label="상품 구매">
-  <!-- 무료 미르 배너 (시트 위 8px floating) — 버전 B에선 숨김 -->
-  <div class="store-banner" id="storeBanner" onclick="claimFreeMir()">
-    <div class="store-banner-icon"><img src="./images/banner-gems.png" alt=""></div>
-    <div class="store-banner-text">
-      <div class="store-banner-title">매일 무료 미르 받기</div>
-      <div class="store-banner-sub">룰렛 · 미션 · 친구 초대 +200미르</div>
-    </div>
-    <button class="store-banner-cta" onclick="event.stopPropagation();claimFreeMir()">지금 받기</button>
-  </div>
-  <div class="ss-grabber"></div>
-  <div class="ss-scroll">
-    <!-- 미르 구매 -->
-    <div class="mir-sec mir-sec-top"><h3>미르 구매</h3></div>
-    <div class="mir-grid">
-      <div class="mir-card" onclick="buyMir('300 미르')">
-        <div class="mir-pile"><img src="./images/store-1.png" alt="300 미르"></div>
-        <div class="mir-amt">300 미르</div>
-        <div class="mir-bns"></div>
-        <button class="mir-pbtn">₩2,200</button>
-      </div>
-      <div class="mir-card" onclick="buyMir('600 미르')">
-        <div class="mir-pile"><img src="./images/store-2.png" alt="600 미르"></div>
-        <div class="mir-amt">600 미르</div>
-        <div class="mir-bns"></div>
-        <button class="mir-pbtn">₩4,400</button>
-      </div>
-      <div class="mir-card" onclick="buyMir('1,200 미르')">
-        <div class="mir-badge">+15%</div>
-        <div class="mir-pile"><img src="./images/store-3.png" alt="1,200 미르"></div>
-        <div class="mir-amt">1,200 미르</div>
-        <div class="mir-bns">+ 180 보너스</div>
-        <button class="mir-pbtn">₩8,800</button>
-      </div>
-      <div class="mir-card" onclick="buyMir('4,000 미르')">
-        <div class="mir-badge">+15%</div>
-        <div class="mir-pile"><img src="./images/store-4.png" alt="4,000 미르"></div>
-        <div class="mir-amt">4,000 미르</div>
-        <div class="mir-bns">+ 600 보너스</div>
-        <button class="mir-pbtn">₩29,000</button>
-      </div>
-      <div class="mir-card" onclick="buyMir('8,000 미르')">
-        <div class="mir-badge">+20%</div>
-        <div class="mir-pile"><img src="./images/store-5.png" alt="8,000 미르"></div>
-        <div class="mir-amt">8,000 미르</div>
-        <div class="mir-bns">+ 1,600 보너스</div>
-        <button class="mir-pbtn">₩58,000</button>
-      </div>
-      <div class="mir-card" onclick="buyMir('16,000 미르')">
-        <div class="mir-badge">+20%</div>
-        <div class="mir-pile"><img src="./images/store-6.png" alt="16,000 미르"></div>
-        <div class="mir-amt">16,000 미르</div>
-        <div class="mir-bns">+ 3,200 보너스</div>
-        <button class="mir-pbtn">₩119,000</button>
-      </div>
-    </div>
-    <!-- 무제한 채팅 (구독) -->
-    <div class="mir-sec"><h3>무제한 채팅</h3></div>
-    <div class="plan-card">
-      <!-- 연/월 토글 (카드 안 최상단) -->
-      <div class="period-pill-wrap">
-        <div class="period-pill">
-          <button class="pp-seg active" data-period="annual" onclick="selectStorePeriod(this)">연간 <span class="pp-badge">24% 할인</span></button>
-          <button class="pp-seg" data-period="monthly" onclick="selectStorePeriod(this)">월간</button>
-        </div>
-      </div>
-      <div class="plan-top">
-        <img class="plan-icon" src="./images/store-380.png" width="28" height="28" alt="MAX">
-        <span class="plan-name">MAX</span>
-      </div>
-      <div class="plan-pricing">
-        <span class="price-original" id="ssPriceOrig">₩55,000</span>
-        <div class="price-main"><span id="ssPriceMain">₩41,583</span><small> / 월</small></div>
-      </div>
-      <ul class="plan-features">
-        <li class="feat">
-          <span class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
-          <span class="feat-text">무제한 대화 (성능에 특화)</span>
-          <svg class="feat-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        </li>
-        <li class="feat">
-          <span class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a8 8 0 0 0-8 8c0 1.5.4 3 1.1 4.2L4 20l5.8-1.1c1.2.7 2.7 1.1 4.2 1.1a8 8 0 0 0 0-16z"/><circle cx="9" cy="11" r="1"/><circle cx="12" cy="11" r="1"/><circle cx="15" cy="11" r="1"/></svg></span>
-          <span class="feat-text">장기기억 슬롯 +10 (100턴 분량)</span>
-          <svg class="feat-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        </li>
-        <li class="feat">
-          <span class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span>
-          <span class="feat-text">최대 입력 글자수 2배</span>
-          <svg class="feat-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        </li>
-      </ul>
-      <!-- CTA -->
-      <button class="cta" onclick="buyPlan()">무제한 채팅하기</button>
-      <div class="cta-note">매월 자동 갱신 · 언제든 취소 가능</div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ VERSION B: 미르 부족 모달 ═══ -->
-<!-- ═══ 구독 풀스크린 오버레이 (mirai-subscribe) ═══ -->
-<div class="sub-overlay" id="subOverlay">
-  <button class="sub-overlay-close" onclick="closeSubscribe()" aria-label="닫기">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-  </button>
-  <iframe id="subFrame" title="구독" loading="lazy"></iframe>
-</div>
-
-<div class="b-backdrop" id="bBackdrop"></div>
-<button class="b-close" id="bClose" onclick="closeB()" aria-label="닫기">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-</button>
-<div class="b-modal" id="bModal" role="dialog" aria-label="미르가 부족해요">
-  <div class="b-hook">
-    <div class="b-hook-avatar"><img src="./images/char-profile.png" alt="Adrian"></div>
-    <div class="b-hook-body">
-      <div class="b-hook-bubble">잠깐 있다 올거지?</div>
-      <div class="b-hook-narr">계속하려면 미르를 충전해주세요.</div>
-    </div>
-  </div>
-  <div class="mir-grid">
-    <div class="mir-card" onclick="buyMir('1,200 미르')">
-      <div class="mir-pile"><img src="./images/store-3.png" alt="1,200 미르"></div>
-      <div class="mir-amt">1,200 미르</div>
-      <div class="mir-bns">+ 180 보너스</div>
-      <button class="mir-pbtn">₩8,800</button>
-    </div>
-    <div class="mir-card" onclick="buyMir('4,000 미르')">
-      <div class="mir-best">BEST</div>
-      <div class="mir-pile"><img src="./images/store-4.png" alt="4,000 미르"></div>
-      <div class="mir-amt">4,000 미르</div>
-      <div class="mir-bns">+ 600 보너스</div>
-      <button class="mir-pbtn">₩29,000</button>
-    </div>
-    <div class="mir-card" onclick="buyMir('8,000 미르')">
-      <div class="mir-pile"><img src="./images/store-5.png" alt="8,000 미르"></div>
-      <div class="mir-amt">8,000 미르</div>
-      <div class="mir-bns">+ 1,600 보너스</div>
-      <button class="mir-pbtn">₩58,000</button>
-    </div>
-  </div>
-  <button class="b-more" onclick="closeB();openStoreSheet()">옵션 더보기
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-  </button>
-  <button class="b-subscribe" onclick="openSubscribe()">
-    <span class="b-sub-main">
-      <img class="b-sub-icon" src="./images/store-380.png" alt="MAX">
-      <span class="b-sub-label">무제한 채팅하기</span>
-    </span>
-    <span class="b-sub-badge">+12 추가기능 해금</span>
-  </button>
-</div>
-
-<!-- ═══ VERSION C: 메모리 가득참 모달 ═══ -->
-<div class="b-backdrop" id="memBackdrop"></div>
-<button class="b-close" id="memClose" onclick="closeMem()" aria-label="닫기">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-</button>
-<div class="b-modal" id="memModal" role="dialog" aria-label="기억 공간이 거의 찼어요">
-  <div class="b-hook">
-    <div class="b-hook-avatar"><img src="./images/char-profile.png" alt="Adrian"></div>
-    <div class="b-hook-body">
-      <div class="b-hook-bubble">우리 얘기… 잊고 싶지 않아.</div>
-      <div class="b-hook-narr">기억이 거의 다 찼어요.<br>곧 오래된 대화부터 잊어버려요.</div>
-    </div>
-  </div>
-  <button class="mem-cta" onclick="openSubscribe()">
-    <img src="./images/store-380.png" alt="">
-    장기기억 켜기
-  </button>
-  <button class="mem-later" onclick="closeMem()">나중에 할게요</button>
-</div>
-
-<!-- ═══ VERSION D: 메모리 부족 인라인 알림 배너 ═══ -->
-<div class="mem-notice" id="memNotice">
-  <div class="mn-top">
-    <svg class="mn-warn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
-    <span class="mn-title">메모리 여유공간이 10% 미만으로 남았어요</span>
-    <button class="mn-x" onclick="closeMemBar()" aria-label="닫기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-  </div>
-  <div class="mn-gauge">
-    <span class="mn-edge">기본</span>
-    <div class="mn-bar"><div class="mn-fill" style="width:91%"></div></div>
-    <span class="mn-edge hi">강화된</span>
-  </div>
-  <button class="mn-cta" onclick="openSubscribe()">
-    <img src="./images/store-380.png" alt="">
-    향상된 메모리로 늘리기
-  </button>
-</div>
-
 <!-- Edit Modal -->
 <div class="edit-modal" id="editModal">
   <div class="ds-handle"></div>
@@ -2287,7 +1945,7 @@ body.intro-mode .stat-panel{display:none !important}
         <div class="ds-title">오늘의 무료 수정을 모두 사용했어요</div>
         <div class="ds-subtitle">구독하면 무제한으로 수정할 수 있어요</div>
       </div>
-      <button class="ds-confirm" onclick="cancelEdit();setTimeout(openStoreSheet,200)">구독하고 무제한 수정하기</button>
+      <button class="ds-confirm" onclick="showToast('구독 페이지로 이동합니다')">구독하고 무제한 수정하기</button>
       <div class="edit-exhausted-divider"><span>또는</span></div>
       <button class="edit-mir-buy" onclick="buyEditWithMir()">
         <img src="./images/mir.png" alt="미르" style="width:16px;height:16px;vertical-align:-3px;margin-right:4px">5 미르로 1회 수정하기
@@ -2301,11 +1959,11 @@ body.intro-mode .stat-panel{display:none !important}
 <div class="settings-screen" id="settingsScreen">
   <div class="settings-header">
     <div class="settings-header-left">
-      <span class="settings-model-chip" onclick="openStoreFromSettings()" style="cursor:pointer">
+      <span class="settings-model-chip">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L13.7 10.3L22 12L13.7 13.7L12 22L10.3 13.7L2 12L10.3 10.3Z"/></svg>
         Free
       </span>
-      <span class="settings-mir-chip" onclick="openStoreFromSettings()" style="cursor:pointer">
+      <span class="settings-mir-chip">
         <img src="./images/mir.png" alt="미르"> 33
       </span>
     </div>
@@ -2652,194 +2310,6 @@ function closeOocEdit() {
     }
   }, 300);
 }
-// ═══ 상품 구매 바텀시트 ═══
-function openStoreSheet() {
-  document.body.classList.remove('intro-mode'); // 헤더 노출 (A/B 일관)
-  const bd = document.getElementById('storeBackdrop');
-  if (bd) bd.classList.add('show');
-  document.querySelectorAll('.tap-coach').forEach(c => { c.classList.remove('show'); c.setAttribute('hidden', ''); });
-  // 무료 미르 배너: 버전 B에선 숨김, A에선 노출
-  const banner = document.getElementById('storeBanner');
-  if (banner) {
-    const ver = document.querySelector('.ver-seg.active')?.dataset.ver;
-    banner.style.display = ver === 'b' ? 'none' : '';
-  }
-  document.getElementById('storeSheet').classList.add('show');
-}
-function closeStoreSheet() {
-  document.getElementById('storeSheet').classList.remove('show');
-  const bd = document.getElementById('storeBackdrop');
-  if (bd) bd.classList.remove('show');
-  const banner = document.getElementById('storeBanner');
-  if (banner) banner.style.display = 'none'; // 시트 닫으면 배너도 확실히 숨김
-}
-function openStoreFromSettings() {
-  if (typeof closeSettings === 'function') closeSettings();
-  setTimeout(openStoreSheet, 260);
-}
-function selectStorePeriod(btn) {
-  document.querySelectorAll('#storeSheet .pp-seg').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  const isAnnual = btn.dataset.period === 'annual';
-  document.getElementById('ssPriceMain').textContent = isAnnual ? '₩41,583' : '₩55,000';
-  const orig = document.getElementById('ssPriceOrig');
-  const disc = document.getElementById('ssPlanDiscount');
-  if (isAnnual) { orig.classList.remove('price-hidden'); disc.classList.remove('price-hidden'); }
-  else { orig.classList.add('price-hidden'); disc.classList.add('price-hidden'); }
-}
-let curLang = 'ko';
-// 구독 풀스크린 오버레이 (mirai-subscribe/index.html)
-function openSubscribe() {
-  const ov = document.getElementById('subOverlay');
-  const fr = document.getElementById('subFrame');
-  if (fr && !fr.getAttribute('src')) fr.setAttribute('src', './mirai-subscribe/index.html'); // 최초 1회 로드 (배포에 번들됨)
-  if (ov) ov.classList.add('show');
-}
-function closeSubscribe() {
-  const ov = document.getElementById('subOverlay');
-  if (ov) ov.classList.remove('show');
-}
-function buyPlan() { openSubscribe(); }
-function buyMir(label) { showToast(curLang === 'en' ? '💎 Buy ' + label + ' (payment coming soon)' : '💎 ' + label + ' 구매 (결제 연동 예정)'); }
-function claimFreeMir() { showToast(curLang === 'en' ? '🎁 Claim free Credits (event page coming soon)' : '🎁 무료 미르 받기 (이벤트 페이지 연동 예정)'); }
-// ═══ 버전 B: 미르 부족 모달 ═══
-function openB() {
-  document.body.classList.remove('intro-mode'); // 헤더·입력창 노출
-  document.querySelectorAll('.tap-coach').forEach(c => { c.classList.remove('show'); c.setAttribute('hidden', ''); });
-  const modal = document.getElementById('bModal');
-  const bd = document.getElementById('bBackdrop');
-  const banner = document.getElementById('storeBanner');
-  if (banner) banner.style.display = 'none'; // 버전 B에선 배너 숨김
-  // 항상 화면 정중앙
-  modal.classList.add('centered');
-  modal.style.bottom = '';
-  bd.style.bottom = '';
-  bd.classList.add('show');
-  modal.classList.add('show');
-  // 닫기 버튼: 모달 위 상단 중앙에 배치
-  requestAnimationFrame(() => {
-    const close = document.getElementById('bClose');
-    if (!close) return;
-    const box = modal.getBoundingClientRect();
-    const top = (window.innerHeight - box.height) / 2;
-    close.style.top = Math.max(8, top - 44) + 'px';
-    close.style.left = (window.innerWidth / 2 - 18) + 'px';
-    close.classList.add('show');
-  });
-}
-function closeB() {
-  document.getElementById('bModal').classList.remove('show');
-  document.getElementById('bBackdrop').classList.remove('show');
-  document.getElementById('bClose').classList.remove('show');
-}
-// ═══ 버전 C: 메모리 가득참 모달 ═══
-function openMem() {
-  document.body.classList.remove('intro-mode');
-  document.querySelectorAll('.tap-coach').forEach(c => { c.classList.remove('show'); c.setAttribute('hidden', ''); });
-  const modal = document.getElementById('memModal');
-  const bd = document.getElementById('memBackdrop');
-  const banner = document.getElementById('storeBanner');
-  if (banner) banner.style.display = 'none';
-  // 항상 화면 정중앙
-  modal.classList.add('centered'); modal.style.bottom = ''; bd.style.bottom = '';
-  bd.classList.add('show'); modal.classList.add('show');
-  requestAnimationFrame(() => {
-    const close = document.getElementById('memClose'); if (!close) return;
-    const box = modal.getBoundingClientRect();
-    const top = (window.innerHeight - box.height) / 2;
-    close.style.top = Math.max(8, top - 44) + 'px';
-    close.style.left = (window.innerWidth / 2 - 18) + 'px';
-    close.classList.add('show');
-  });
-}
-function closeMem() {
-  document.getElementById('memModal').classList.remove('show');
-  document.getElementById('memBackdrop').classList.remove('show');
-  document.getElementById('memClose').classList.remove('show');
-}
-// ═══ 버전 D: 메모리 부족 인라인 배너 (탑바 하단, 비-블로킹) ═══
-function openMemBar() {
-  document.body.classList.remove('intro-mode');
-  document.querySelectorAll('.tap-coach').forEach(c => { c.classList.remove('show'); c.setAttribute('hidden', ''); });
-  const banner = document.getElementById('storeBanner');
-  if (banner) banner.style.display = 'none';
-  document.getElementById('memNotice').classList.add('show');
-}
-function closeMemBar() {
-  document.getElementById('memNotice').classList.remove('show');
-}
-// ═══ 언어(KO/EN) 스왑 — store 시트 + B/C 모달 텍스트 ═══
-let _storeKO = null, _modalKO = null, _memKO = null, _noticeKO = null;
-const I18N = [
-  ['매일 무료 미르 받기','Earn free Credits daily'],
-  ['룰렛 · 미션 · 친구 초대 +200미르','Roulette · Missions · Invite +200'],
-  ['>지금 받기<','>Claim<'],
-  ['<h3>미르 구매</h3>','<h3>Buy Credits</h3>'],
-  ['<h3>무제한 채팅</h3>','<h3>Unlimited Chat</h3>'],
-  ['300 미르','300 Credits'],['600 미르','600 Credits'],['1,200 미르','1,200 Credits'],
-  ['4,000 미르','4,000 Credits'],['8,000 미르','8,000 Credits'],['16,000 미르','16,000 Credits'],
-  ['+ 180 보너스','+180 bonus'],['+ 600 보너스','+600 bonus'],
-  ['+ 1,600 보너스','+1,600 bonus'],['+ 3,200 보너스','+3,200 bonus'],
-  ['>연간 ','>Yearly '],['24% 할인','24% off'],['>월간<','>Monthly<'],
-  ['무제한 대화 (성능에 특화)','High-performance unlimited chat'],
-  ['장기기억 슬롯 +10 (100턴 분량)','Long-term memory +10 slots (~100 turns)'],
-  ['최대 입력 글자수 2배','2× max input length'],
-  ['매월 자동 갱신 · 언제든 취소 가능','Auto-renews monthly · Cancel anytime'],
-  ['잠깐 있다 올거지?',"You'll come back soon, right?"],
-  ['계속하려면 미르를 충전해주세요.','Top up Credits to keep chatting.'],
-  ['옵션 더보기','More options'],
-  ['>구매하기<','>Buy<'],
-  ['무제한 채팅하기','Go Unlimited'],
-  ['+12 추가기능 해금','+ 12 features'],
-  ['alt="미르"','alt="Credits"'],
-  // 버전 C: 메모리 모달
-  ['우리 얘기… 잊고 싶지 않아.',"I don't want to forget us…"],
-  ['기억이 거의 다 찼어요.<br>곧 오래된 대화부터 잊어버려요.','Memory is almost full.<br>Older moments will start fading.'],
-  ['장기기억 켜기','Turn on long-term memory'],
-  ['나중에 할게요','Maybe later'],
-  // 버전 D: 메모리 배너
-  ['메모리 여유공간이 10% 미만으로 남았어요','Less than 10% memory left'],
-  ['기본</span>','Basic</span>'],
-  ['강화된</span>','Enhanced</span>'],
-  ['향상된 메모리로 늘리기','Upgrade to enhanced memory'],
-];
-function _applyI18N(html) { for (const p of I18N) html = html.split(p[0]).join(p[1]); return html; }
-function snapshotKO() {
-  const s = document.getElementById('storeSheet'); if (s && _storeKO === null) _storeKO = s.innerHTML;
-  const m = document.getElementById('bModal');    if (m && _modalKO === null) _modalKO = m.innerHTML;
-  const mm = document.getElementById('memModal'); if (mm && _memKO === null) _memKO = mm.innerHTML;
-  const mn = document.getElementById('memNotice'); if (mn && _noticeKO === null) _noticeKO = mn.innerHTML;
-}
-function setLang(lang) {
-  snapshotKO();
-  curLang = lang;
-  const s = document.getElementById('storeSheet'), m = document.getElementById('bModal'), mm = document.getElementById('memModal'), mn = document.getElementById('memNotice');
-  if (s) s.innerHTML = lang === 'en' ? _applyI18N(_storeKO) : _storeKO;
-  if (m) m.innerHTML = lang === 'en' ? _applyI18N(_modalKO) : _modalKO;
-  if (mm) mm.innerHTML = lang === 'en' ? _applyI18N(_memKO) : _memKO;
-  if (mn) mn.innerHTML = lang === 'en' ? _applyI18N(_noticeKO) : _noticeKO;
-}
-// A/B × 언어 스위칭
-function switchVersion(v, lang) {
-  lang = lang || curLang;
-  document.querySelectorAll('.ver-seg').forEach(b => b.classList.toggle('active', b.dataset.ver === v && b.dataset.lang === lang));
-  setLang(lang);
-  closeStoreSheet(); closeB(); closeMem(); closeMemBar();
-  if (v === 'b') openB();
-  else if (v === 'c') openMem();
-  else if (v === 'd') openMemBar();
-  else openStoreSheet();
-}
-// 데모: 로드 시 자동 노출 (?v=b → 버전 B, ?v=c → 메모리, ?lang=en → 영어)
-window.addEventListener('load', () => {
-  const p = new URLSearchParams(location.search);
-  const vp = p.get('v');
-  const v = (vp === 'b' || vp === 'c' || vp === 'd') ? vp : 'a';
-  const lang = p.get('lang') === 'en' ? 'en' : 'ko';
-  document.querySelectorAll('.ver-seg').forEach(b => b.classList.toggle('active', b.dataset.ver === v && b.dataset.lang === lang));
-  setTimeout(() => { setLang(lang); if (v === 'b') openB(); else if (v === 'c') openMem(); else if (v === 'd') openMemBar(); else openStoreSheet(); }, 100);
-});
-
 function closeModelSheet() {
   document.getElementById('modelDropdown').classList.remove('show');
 }
@@ -2977,10 +2447,144 @@ function dismissBgmIntro() {
   }
   startDialogueFlow();
 }
-document.addEventListener('DOMContentLoaded', () => {
-  // 미르충전 A/B 데모: store/모달이 자동 노출되므로 인트로 코치마크 생략
-  // showTapCoach();
+document.addEventListener('DOMContentLoaded', async () => {
+  bgmIntroShown = true;
+  document.body.classList.remove('intro-mode');
+  await renderChatFeed();
+  // 전체 렌더 끝난 후 2초 뒤 답장 제안
+  setTimeout(showSuggestions, 2000);
 });
+
+async function renderChatFeed() {
+  const feed = document.getElementById('chatFeed');
+  if (!feed) return;
+  feed.innerHTML = '';
+  const timeHeader = document.createElement('div');
+  timeHeader.className = 'msg-time';
+  timeHeader.textContent = 'May 12, 2026';
+  feed.appendChild(timeHeader);
+
+  for (const m of MESSAGES) {
+    if (m.type === 'narration') {
+      await appendNarrationBubble(m.text);
+      await wait(350);
+    } else if (m.type === 'image') {
+      appendImageBubble(m.img);
+      await wait(450);
+    } else {
+      await appendCharBubbleAnimated(m);
+      await wait(450);
+    }
+  }
+}
+
+function wait(ms){return new Promise(r => setTimeout(r, ms))}
+
+function appendImageBubble(src){
+  const feed = document.getElementById('chatFeed');
+  const el = document.createElement('div');
+  el.className = 'msg msg-char';
+  el.innerHTML = `
+    <div class="msg-stack">
+      <div class="msg-img"><img src="${src}" alt=""></div>
+    </div>`;
+  feed.appendChild(el);
+  el.scrollIntoView({block:'end', behavior:'smooth'});
+}
+
+function appendNarrationBubble(text){
+  return new Promise(resolve => {
+    const feed = document.getElementById('chatFeed');
+    const el = document.createElement('div');
+    el.className = 'msg msg-char';
+    el.innerHTML = `
+      <div class="msg-stack">
+        <div class="msg-bubble msg-narration"><span class="msg-typed"></span><span class="msg-cursor"></span></div>
+      </div>`;
+    feed.appendChild(el);
+    el.scrollIntoView({block:'end', behavior:'smooth'});
+    const stackEl = el.querySelector('.msg-stack');
+    const typedEl = el.querySelector('.msg-typed');
+    const cursorEl = el.querySelector('.msg-cursor');
+    let i = 0;
+    const tick = setInterval(() => {
+      if (i >= text.length){
+        clearInterval(tick);
+        cursorEl.remove();
+        stackEl.insertAdjacentHTML('beforeend', _msgActionsHtml());
+        resolve();
+        return;
+      }
+      i++;
+      typedEl.textContent = text.slice(0, i);
+      feed.scrollTop = feed.scrollHeight;
+    }, 28);
+  });
+}
+
+function appendCharBubbleAnimated(m){
+  return new Promise(resolve => {
+    const feed = document.getElementById('chatFeed');
+    const avatar = KEN_AVATARS[m.speaker] || './images/kennedy-thumb.webp';
+    const el = document.createElement('div');
+    el.className = 'msg msg-char';
+    el.innerHTML = `
+      <div class="msg-stack">
+        <div class="msg-header">
+          <img class="msg-avatar" src="${avatar}" alt="">
+          <span class="msg-name">${escapeHtml(m.speaker)}</span>
+        </div>
+        <div class="msg-bubble"><span class="msg-typed"></span><span class="msg-cursor"></span></div>
+      </div>`;
+    feed.appendChild(el);
+    el.scrollIntoView({block:'end', behavior:'smooth'});
+    const stackEl = el.querySelector('.msg-stack');
+    const typedEl = el.querySelector('.msg-typed');
+    const cursorEl = el.querySelector('.msg-cursor');
+    const narrPart = m.narr || '';
+    const textPart = m.text || '';
+    const fullChars = narrPart + (narrPart ? ' ' : '') + textPart;
+    const narrLen = narrPart ? narrPart.length + 1 : 0;
+    let i = 0;
+    const tick = setInterval(() => {
+      if (i >= fullChars.length){
+        clearInterval(tick);
+        cursorEl.remove();
+        stackEl.insertAdjacentHTML('beforeend', _msgActionsHtml());
+        resolve();
+        return;
+      }
+      i++;
+      const shown = fullChars.slice(0, i);
+      if (narrLen > 0 && i <= narrLen){
+        typedEl.innerHTML = `<span class="narr">${escapeHtml(shown)}</span>`;
+      } else {
+        typedEl.innerHTML = `<span class="narr">${escapeHtml(narrPart)} </span>${escapeHtml(shown.slice(narrLen))}`;
+      }
+      feed.scrollTop = feed.scrollHeight;
+    }, 32);
+  });
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function toggleStatPanel() {
+  showToast('스탯 패널 — 추후 구현');
+}
+
+function confirmCutsceneUnlockMsg() {
+  showConfirm('컷씬을 해금하시겠습니까?', '120 미르가 차감되며 앨범에 영구 추가됩니다.', () => {
+    const bubble = document.getElementById('cutsceneImgBubble');
+    if (bubble) {
+      bubble.classList.remove('locked');
+      const img = bubble.querySelector('img');
+      if (img) img.src = './images/kennedy-cutscene.webp';
+    }
+    showToast('컷씬을 해금했어요');
+  });
+}
 function insertAsterisk() {
   const input = document.querySelector('.input-field');
   if (!input) return;
@@ -3046,10 +2650,30 @@ document.addEventListener('click', (e) => {
 });
 
 // ═══ DIALOGUE NAVIGATION ═══
-const DIALOGUES = [
-  {type:'narration', lines:['좁은 주방 안, 달각거리는 냄비 소리와 고소한 기름 냄새가 공기를 채운다. 뒷모습으로 서 있던 셀린이 천천히 고개를 돌렸다.']},
-  {type:'dialogue', lines:['"정말 이상하네. 이 책에 써진 대로 정확히 했는데..."', '"너 혹시 나를 도와줄 만큼 쓸모 있는 존재야?"', '"아니면 또 마법사 길드 사람들에게 잔소리를 듣게 생겼잖아... 아, 정말 귀찮게 됐네."']},
-  {type:'dialogue', lines:['"...뭐야, 너. 갑자기 나타나서 날 도와주겠다고?"', '"수상하지만... 일단 들어봐 줄게."']},
+const DIALOGUES = []; // 기존 미연시 로직 호환용 빈 배열
+
+const KEN_AVATARS = {
+  Theo:  './images/kennedy-theo.webp',
+  Liam:  './images/kennedy-liam.webp',
+  Noah:  './images/kennedy-noah.webp',
+  Zach:  './images/kennedy-zach.webp',
+  Cash:  './images/kennedy-cash.webp',
+};
+const MESSAGES = [
+  {type:'image', img:'./images/kennedy-group.webp'},
+  {type:'narration', text:"Stacey just hugged you goodbye in the doorway and walked back inside to her girlfriend at the dance floor. The five Kennedy brothers — who have been around the balcony all night — notice the moment she's gone. All five of them start moving."},
+  {type:'image', img:'./images/kennedy-theo.webp'},
+  {type:'dialogue', speaker:'Theo', narr:"Theo straightens off the doorway he was leaning against. Sharp green eyes that haven't moved off you in an hour stop pretending.", text:"Eight summers. We watched you grow up."},
+  {type:'image', img:'./images/kennedy-liam.webp'},
+  {type:'dialogue', speaker:'Liam', narr:"Liam closes his paperback, sets the wine down, gets up.", text:"We talked about this. In the dark. What we'd do if you ever knew."},
+  {type:'image', img:'./images/kennedy-noah.webp'},
+  {type:'dialogue', speaker:'Noah', narr:"Noah pockets his phone — first time tonight — and pushes off the railing with a smirk.", text:"We agreed years ago. None of us would choose."},
+  {type:'image', img:'./images/kennedy-zach.webp'},
+  {type:'dialogue', speaker:'Zach', narr:"Zach grinds his cigarette out on the rail, the half-smile gone for the first time in two hours.", text:"Tonight you finally know."},
+  {type:'narration', text:"Cash gets to you first. 28, eldest, broad-shouldered, gravel voice. Heat radiating off his skin, grease-streaked fingers grazing your hip. The four behind him don't move. They don't need to."},
+  {type:'image', img:'./images/kennedy-cash.webp'},
+  {type:'dialogue', speaker:'Cash', text:"Five of us. One you. No choosing."},
+  {type:'narration', text:"The Aegean roars below. The night waits."},
 ];
 let dlgIndex = 0;
 let inputShown = false;
@@ -3094,8 +2718,6 @@ function showDialogue(idx, skipTTS) {
       el.innerHTML = dlg.lines.map(l => '<div class="ln">' + l + '</div>').join('');
       // 타이핑 끝 → 탭 힌트 리플 시작 (마지막 페이지 제외)
       if (tapHintRipple && !isLast) tapHintRipple.classList.add('show');
-      // 첫 다이얼로그 완료 시 터치 안내 코치마크 (1회)
-      if (!isLast) showTapCoach();
       return;
     }
     const c = fullText[charIdx];
@@ -3371,101 +2993,144 @@ document.getElementById('overlayBackdrop').addEventListener('click', () => {
 });
 
 // Toast
-// ═══ SEND MESSAGE ═══
+// ═══ SEND MESSAGE (메신저 모드 — 유저 버블 추가) ═══
 function sendMessage() {
   const input = document.querySelector('.input-field');
-  const text = input.value.trim() || '(메시지 전송)';
+  const text = input.value.trim();
+  if (!text) return;
   input.value = '';
   input.style.height = 'auto';
 
-  // 선택지 숨기고 대사 영역 복원
-  const choiceCards = document.getElementById('choiceCards');
-  if (choiceCards) choiceCards.style.display = 'none';
-  const dlgTapArea = document.getElementById('dlgTapArea');
-  dlgTapArea.style.display = '';
-  choicesVisible = false;
-  document.getElementById('app').classList.remove('choices-open');
-  const toggleBtn = document.getElementById('choiceToggleBtn');
-  if (toggleBtn) toggleBtn.classList.remove('active');
+  appendUserBubble(text);
+}
 
-  // 로딩 중 인풋 숨기기
-  document.querySelector('.input-wrap').style.display = 'none';
+function _msgActionsHtml(){
+  return `
+    <div class="msg-actions">
+      <button class="msg-action" title="대사 수정" onclick="showToast('대사 수정')"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.15 1.85C10.95 1.05 12.25 1.05 13.05 1.85L14.15 2.95C14.95 3.75 14.95 5.05 14.15 5.85L5.55 14.45C5.35 14.65 5.1 14.75 4.85 14.75H2.25C1.75 14.75 1.35 14.35 1.35 13.85V11.25C1.35 11 1.45 10.75 1.65 10.55L10.15 1.85ZM11.05 2.95C10.75 2.65 10.45 2.65 10.15 2.95L8.95 4.15L11.85 7.05L13.05 5.85C13.35 5.55 13.35 5.25 13.05 4.95L11.05 2.95ZM10.85 8.05L7.95 5.15L2.75 10.35V13.35H5.55L10.85 8.05Z" fill="currentColor" fill-opacity="0.85"/></svg></button>
+      <button class="msg-action" title="삭제" onclick="this.closest('.msg').remove()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg></button>
+    </div>`;
+}
 
-  // 이름 표시
-  const nameRow = document.querySelector('.name-row');
-  nameRow.style.opacity = '1';
-  document.querySelector('.name-row-wrap').style.display = '';
+function appendUserBubble(text) {
+  const feed = document.getElementById('chatFeed');
+  if (!feed) return;
+  const el = document.createElement('div');
+  el.className = 'msg msg-user';
+  el.innerHTML = `
+    <div class="msg-stack">
+      <div class="msg-bubble">${escapeHtml(text)}</div>
+      ${_msgActionsHtml()}
+    </div>`;
+  feed.appendChild(el);
+  setTimeout(() => { feed.scrollTop = feed.scrollHeight; }, 0);
+  scheduleAIReply();
+}
 
-  // 대사 영역: 유저 메시지 표시 + 타이핑 애니메이션
-  const nameText = document.querySelector('.name-text');
-  nameText.textContent = '최고의찐빵';
-  nameText.classList.add('user-name');
-  // 유저 메시지일 때 TTS 파동 + 편집 연필 + 되돌리기 숨김
-  document.getElementById('ttsIndicator').style.display = 'none';
-  document.getElementById('dlgEditBtn').style.display = 'none';
-  document.getElementById('dlgReportBtn').style.display = 'none';
-  document.getElementById('prevTurnBtn').style.display = 'none';
-  const dlgText = document.getElementById('dlgText');
-  dlgText.style.color = 'var(--label-normal)';
-  if (window._typingTimer) clearInterval(window._typingTimer);
-  let uCharIdx = 0;
-  dlgText.innerHTML = '<span class="typing-cursor"></span>';
+const _AI_REPLIES = [
+  {speaker:'Cash', narr:"Cash steps closer, the heat of him filling the space between you.", text:"Take your time. We're not going anywhere."},
+  {speaker:'Liam', narr:"Liam tilts his head, eyes thoughtful behind the rim of his glass.", text:"That's not an answer. Try again."},
+  {speaker:'Noah', narr:"Noah lets out a low laugh, no humor in it.", text:"Oh, this just got interesting."},
+  {speaker:'Theo', narr:"Theo's gaze doesn't waver. He hasn't blinked in a while.", text:"Say it again. I want to hear it twice."},
+  {speaker:'Zach', narr:"Zach grins, slow and sharp, eyes locked on yours.", text:"You sure about that?"},
+];
 
-  // progress-row: 진행 라벨 숨기고 로딩 즉시 표시 (타이핑과 동시)
-  document.querySelector('.progress-label').style.display = 'none';
-  document.getElementById('progressLoading').style.display = 'flex';
-  // 유저 대사 중 탭 유도 리플 숨김
-  const ripple = document.getElementById('tapHintRipple');
-  if (ripple) ripple.classList.remove('show');
+const _SUGGESTIONS = [
+  "I... I didn't know. None of you ever said anything.",
+  "Don't do this. Not all of you. Not like this.",
+  "Then who picks? Because I can't.",
+];
 
-  window._typingTimer = setInterval(() => {
-    if (uCharIdx >= text.length) {
-      clearInterval(window._typingTimer);
-      dlgText.innerHTML = '<div class="ln">' + text + '</div>';
-      // 타이핑 완료 후 3초 더 대기 → AI 응답
-      setTimeout(_runAIResponse, 3000);
+function scheduleAIReply(){
+  const r = _AI_REPLIES[Math.floor(Math.random() * _AI_REPLIES.length)];
+  const label = document.querySelector('.progress-label');
+  const loading = document.getElementById('progressLoading');
+  if (label) label.style.display = 'none';
+  if (loading) loading.style.display = 'flex';
+
+  setTimeout(() => {
+    if (loading) loading.style.display = 'none';
+    if (label) label.style.display = '';
+    appendCharBubble(r);
+    // 타이핑 소요시간 추정 + 2초 더 기다린 후 페이드인
+    const typingMs = ((r.narr ? r.narr.length + 1 : 0) + (r.text || '').length) * 32 + 2000;
+    setTimeout(showSuggestions, typingMs);
+  }, 2000);
+}
+
+function showSuggestions(){
+  removeSuggestions();
+  const feed = document.getElementById('chatFeed');
+  if (!feed) return;
+  const wrap = document.createElement('div');
+  wrap.className = 'msg-suggest-wrap';
+  wrap.id = '__suggestWrap';
+  wrap.innerHTML = `
+    <div class="msg-suggest-hint">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z"/></svg>
+      You can reply like this
+    </div>
+    ${_SUGGESTIONS.map(s => `
+      <button class="msg-suggest" onclick="pickSuggestion(this)">${escapeHtml(s)}</button>
+    `).join('')}`;
+  feed.appendChild(wrap);
+  feed.scrollTop = feed.scrollHeight;
+}
+
+function removeSuggestions(){
+  const w = document.getElementById('__suggestWrap');
+  if (w) w.remove();
+}
+
+function pickSuggestion(btn){
+  const text = btn.textContent.trim();
+  removeSuggestions();
+  appendUserBubble(text);
+}
+
+function appendCharBubble(m){
+  const feed = document.getElementById('chatFeed');
+  if (!feed) return;
+  const avatar = KEN_AVATARS[m.speaker] || './images/kennedy-thumb.webp';
+  const el = document.createElement('div');
+  el.className = 'msg msg-char';
+  el.innerHTML = `
+    <div class="msg-stack">
+      <div class="msg-header">
+        <img class="msg-avatar" src="${avatar}" alt="">
+        <span class="msg-name">${escapeHtml(m.speaker)}</span>
+      </div>
+      <div class="msg-bubble"><span class="msg-typed"></span><span class="msg-cursor"></span></div>
+    </div>`;
+  feed.appendChild(el);
+  feed.scrollTop = feed.scrollHeight;
+
+  // 타이핑 애니메이션
+  const stackEl = el.querySelector('.msg-stack');
+  const typedEl = el.querySelector('.msg-typed');
+  const cursorEl = el.querySelector('.msg-cursor');
+  const narrPart = m.narr || '';
+  const textPart = m.text || '';
+  const fullChars = narrPart + (narrPart ? ' ' : '') + textPart;
+  const narrLen = narrPart ? narrPart.length + 1 : 0;
+  let i = 0;
+  const tick = setInterval(() => {
+    if (i >= fullChars.length) {
+      clearInterval(tick);
+      cursorEl.remove();
+      // 타이핑 끝난 뒤 액션 아이콘 노출
+      stackEl.insertAdjacentHTML('beforeend', _msgActionsHtml());
       return;
     }
-    dlgText.innerHTML = '<div class="ln">' + text.substring(0, uCharIdx + 1) + '<span class="typing-cursor"></span></div>';
-    uCharIdx++;
-  }, 30);
-
-  // AI 응답 처리 (타이핑 완료 후 3초 뒤 실행)
-  function _runAIResponse() {
-    dlgIndex = 0;
-    inputShown = false;
-    const newDialogues = [
-      {type:'dialogue', lines:['"흥, 또 네가 왔군."', '"...뭐, 싫지는 않아."']},
-      {type:'narration', lines:['셀린은 살짝 고개를 돌렸지만,', '입꼬리가 미세하게 올라갔다.']},
-      {type:'dialogue', lines:['"다음엔 좀 더 재미있는 이야기를 해줘."', '"지루한 건 딱 질색이거든."']},
-    ];
-    DIALOGUES.length = 0;
-    newDialogues.forEach(d => DIALOGUES.push(d));
-    seenDialogues.clear();
-    // 이름 원복 (유저 → 셀린)
-    const nt = document.querySelector('.name-text');
-    nt.textContent = '셀린';
-    nt.classList.remove('user-name');
-    // TTS 파동 + 편집 연필 + 되돌리기 다시 표시
-    document.getElementById('ttsIndicator').style.display = '';
-    document.getElementById('dlgEditBtn').style.display = '';
-    document.getElementById('dlgReportBtn').style.display = '';
-    document.getElementById('prevTurnBtn').style.display = '';
-    // 로딩 숨기고 진행 라벨 복원
-    document.getElementById('progressLoading').style.display = 'none';
-    document.querySelector('.progress-label').style.display = '';
-    document.getElementById('dlgTapArea').style.display = '';
-    document.querySelector('.name-row-wrap').style.display = '';
-    document.querySelector('.name-row').style.opacity = '1';
-    document.querySelector('.input-wrap').style.display = 'none';
-    // 선택지 선택 상태 + 인풋 + 버튼 리셋
-    document.querySelectorAll('.choice-card').forEach(c => c.classList.remove('selected'));
-    document.querySelector('.input-field').value = '';
-    const pb = document.getElementById('prevTurnBtn');
-    if (pb) pb.disabled = true;
-    document.getElementById('continueTurnBtn').disabled = true;
-    showDialogue(0);
-  }
+    i++;
+    const shown = fullChars.slice(0, i);
+    if (narrLen > 0 && i <= narrLen) {
+      typedEl.innerHTML = `<span class="narr">${escapeHtml(shown)}</span>`;
+    } else {
+      typedEl.innerHTML = `<span class="narr">${escapeHtml(narrPart)} </span>${escapeHtml(shown.slice(narrLen))}`;
+    }
+    feed.scrollTop = feed.scrollHeight;
+  }, 32);
 }
 
 function showToast(msg) {
@@ -3816,7 +3481,7 @@ function buyEditWithMir() {
   const balanceEl = document.getElementById('mirBalance');
   const balance = parseInt(balanceEl.textContent.replace(/,/g, ''));
   if (balance < EDIT_MIR_COST) {
-    showToast(curLang === 'en' ? "You're out of Credits" : '미르가 부족해요');
+    showToast('미르가 부족해요');
     return;
   }
   // 미르 차감 + 1회 추가
