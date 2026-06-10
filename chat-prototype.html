@@ -2725,7 +2725,7 @@ window.addEventListener('load', () => {
   const v = p.get('v') === 'b' ? 'b' : 'a';
   const lang = p.get('lang') === 'en' ? 'en' : 'ko';
   document.querySelectorAll('.ver-seg').forEach(b => b.classList.toggle('active', b.dataset.ver === v && b.dataset.lang === lang));
-  setTimeout(() => { setLang(lang); if (v === 'b') openB(); else openStoreSheet(); }, 500);
+  setTimeout(() => { setLang(lang); if (v === 'b') openB(); else openStoreSheet(); }, 100);
 });
 
 function closeModelSheet() {
