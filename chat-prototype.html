@@ -2611,7 +2611,7 @@ let curLang = 'ko';
 function openSubscribe() {
   const ov = document.getElementById('subOverlay');
   const fr = document.getElementById('subFrame');
-  if (fr && !fr.getAttribute('src')) fr.setAttribute('src', '../mirai-subscribe/index.html'); // 최초 1회 로드
+  if (fr && !fr.getAttribute('src')) fr.setAttribute('src', './mirai-subscribe/index.html'); // 최초 1회 로드 (배포에 번들됨)
   if (ov) ov.classList.add('show');
 }
 function closeSubscribe() {
