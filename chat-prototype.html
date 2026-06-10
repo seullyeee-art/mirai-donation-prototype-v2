@@ -1401,7 +1401,7 @@ body.intro-mode .stat-panel{display:none !important}
 .ss-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 16px calc(28px + env(safe-area-inset-bottom))}
 /* 연/월 토글 — plan-card 안 최상단 */
 #storeSheet .period-pill-wrap{display:flex;justify-content:flex-start;margin:0 0 14px;position:relative;z-index:1}
-#storeSheet .period-pill{display:inline-flex;padding:3px;background:rgba(255,255,255,0.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:999px;gap:2px}
+#storeSheet .period-pill{display:inline-flex;padding:3px;background:rgba(255,255,255,0.10);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:999px;gap:2px}
 #storeSheet .pp-seg{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:none;background:transparent;border-radius:999px;font-family:inherit;font-size:12px;font-weight:700;color:var(--label-alternative);cursor:pointer;transition:all .2s;white-space:nowrap}
 #storeSheet .pp-seg:active{transform:scale(0.97)}
 #storeSheet .pp-seg.active{background:var(--primary-normal);color:#fff;box-shadow:0 2px 8px rgba(20,195,145,0.32)}
@@ -1510,12 +1510,11 @@ body.intro-mode .stat-panel{display:none !important}
 #storeSheet .mir-card{
   position:relative;
   border-radius:16px;
-  padding:14px 6px 10px;
+  padding:8px 6px 10px;
   display:flex;flex-direction:column;align-items:center;
   cursor:pointer;
   background:
-    radial-gradient(circle 22px at 50% 38px, rgba(26,224,168,0.50), transparent 72%),
-    radial-gradient(ellipse 58px 46px at 50% 41px, rgba(20,195,145,0.26), transparent 72%),
+    radial-gradient(ellipse 46px 20px at 50% 60px, rgba(20,195,145,0.10), transparent 80%),
     radial-gradient(ellipse 80px 40px at 50% 100%, rgba(40,208,237,0.07), transparent 70%),
     linear-gradient(160deg, #2b2c30 0%, #1f2024 100%);
   border:1px solid rgba(255,255,255,0.06);
@@ -1552,12 +1551,16 @@ body.intro-mode .stat-panel{display:none !important}
 }
 #storeSheet .mir-pile{
   position:relative;z-index:2;
-  height:50px;
+  height:60px;
   display:flex;align-items:center;justify-content:center;
   margin-bottom:4px;
 }
 #storeSheet .mir-pile img{
-  max-height:46px;width:auto;object-fit:contain;
+  max-height:56px;width:auto;object-fit:contain;
+  filter:
+    drop-shadow(0 0 5px rgba(26,224,168,0.34))
+    drop-shadow(0 0 12px rgba(20,195,145,0.22))
+    drop-shadow(0 0 20px rgba(20,195,145,0.11));
   animation:gemFloat 3s ease-in-out infinite;
 }
 @keyframes gemFloat{
@@ -1575,13 +1578,13 @@ body.intro-mode .stat-panel{display:none !important}
 }
 #storeSheet .mir-amt{
   position:relative;z-index:2;
-  font-size:12px;font-weight:800;color:var(--label-strong);
+  font-size:13px;font-weight:800;color:var(--label-strong);
   margin-bottom:0;letter-spacing:-0.3px;
 }
 #storeSheet .mir-bns{
   position:relative;z-index:2;
   font-size:10px;font-weight:800;color:var(--primary-normal);
-  margin-bottom:5px;min-height:12px;
+  margin-bottom:9px;min-height:12px;
   text-shadow:0 0 6px rgba(20,195,145,0.4);
   letter-spacing:-0.2px;
 }
@@ -1589,19 +1592,15 @@ body.intro-mode .stat-panel{display:none !important}
   position:relative;z-index:2;
   width:100%;padding:9px 0;
   border-radius:10px;border:none;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 55%),
-    linear-gradient(116deg, var(--primary-normal), var(--primary-heavy));
-  color:#fff;
-  font-size:13px;font-weight:900;
+  background:rgba(255,255,255,0.20);
+  color:var(--label-strong);
+  font-size:13px;font-weight:800;
   font-family:inherit;cursor:pointer;
   margin-top:auto;letter-spacing:-0.3px;
-  box-shadow:
-    0 4px 12px rgba(20,195,145,0.32),
-    0 0 0 1px rgba(255,255,255,0.12) inset,
-    0 1px 0 rgba(255,255,255,0.22) inset;
-  transition:transform .15s;
+  transition:transform .15s, background .15s;
 }
+@media (hover:hover){#storeSheet .mir-pbtn:hover{background:rgba(255,255,255,0.27)}}
+#storeSheet .mir-pbtn:active{transform:scale(0.96)}
 #storeSheet .mir-pbtn:active{transform:scale(0.96)}
 /* ═══ VERSION B: 미르 부족 모달 ═══ */
 .b-backdrop{position:fixed;inset:0;z-index:358;background:rgba(0,0,0,0.5);opacity:0;pointer-events:none;transition:opacity .3s ease}
@@ -1646,11 +1645,10 @@ body.intro-mode .stat-panel{display:none !important}
 /* ═══ VERSION B 리디자인: 미르 카드 그리드 (store 카드 UI 재사용) ═══ */
 .b-modal .mir-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
 .b-modal .mir-card{
-  position:relative;border-radius:16px;padding:12px 6px 12px;
+  position:relative;border-radius:16px;padding:8px 6px 12px;
   display:flex;flex-direction:column;align-items:center;cursor:pointer;
   background:
-    radial-gradient(circle 22px at 50% 38px, rgba(26,224,168,0.50), transparent 72%),
-    radial-gradient(ellipse 58px 46px at 50% 41px, rgba(20,195,145,0.26), transparent 72%),
+    radial-gradient(ellipse 46px 20px at 50% 60px, rgba(20,195,145,0.10), transparent 80%),
     radial-gradient(ellipse 80px 40px at 50% 100%, rgba(40,208,237,0.07), transparent 70%),
     linear-gradient(160deg, #2b2c30 0%, #1f2024 100%);
   border:1.5px solid rgba(255,255,255,0.06);
@@ -1678,10 +1676,15 @@ body.intro-mode .stat-panel{display:none !important}
   box-shadow:0 4px 12px rgba(255,90,74,0.45);
   white-space:nowrap;z-index:4;
 }
-.b-modal .mir-pile{height:52px;display:flex;align-items:center;justify-content:center;margin-bottom:4px}
-.b-modal .mir-pile img{max-height:50px;width:auto;object-fit:contain}
-.b-modal .mir-amt{font-size:12px;font-weight:800;color:var(--label-strong);letter-spacing:-0.3px}
-.b-modal .mir-bns{font-size:10px;font-weight:800;color:var(--primary-normal);min-height:12px;margin-bottom:6px;letter-spacing:-0.2px;text-shadow:0 0 6px rgba(20,195,145,0.4)}
+.b-modal .mir-pile{height:60px;display:flex;align-items:center;justify-content:center;margin-bottom:4px}
+.b-modal .mir-pile img{max-height:56px;width:auto;object-fit:contain;
+  filter:
+    drop-shadow(0 0 5px rgba(26,224,168,0.34))
+    drop-shadow(0 0 12px rgba(20,195,145,0.22))
+    drop-shadow(0 0 20px rgba(20,195,145,0.11));
+}
+.b-modal .mir-amt{font-size:13px;font-weight:800;color:var(--label-strong);letter-spacing:-0.3px}
+.b-modal .mir-bns{font-size:10px;font-weight:800;color:var(--primary-normal);min-height:12px;margin-bottom:10px;letter-spacing:-0.2px;text-shadow:0 0 6px rgba(20,195,145,0.4)}
 .b-modal .mir-pbtn{
   font-size:13px;font-weight:800;color:var(--label-strong);letter-spacing:-0.3px;margin-top:auto;
   background:none;border:none;padding:0;font-family:inherit;
@@ -2111,7 +2114,7 @@ body.intro-mode .stat-panel{display:none !important}
         </li>
       </ul>
       <!-- CTA -->
-      <button class="cta" onclick="buyPlan()">구독하기</button>
+      <button class="cta" onclick="buyPlan()">무제한 채팅하기</button>
       <div class="cta-note">매월 자동 갱신 · 언제든 취소 가능</div>
     </div>
   </div>
@@ -2629,6 +2632,12 @@ function selectBCard(el, label) {
   document.querySelectorAll('#bModal .mir-card').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
   bSelected = label;
+  updateBuyLabel();
+}
+function updateBuyLabel() {
+  const btn = document.querySelector('#bModal .b-buy');
+  if (!btn) return;
+  btn.textContent = curLang === 'en' ? ('Buy ' + bSelected) : (bSelected + ' 구매하기');
 }
 function openB() {
   document.body.classList.remove('intro-mode'); // 헤더·입력창 노출
@@ -2690,7 +2699,6 @@ const I18N = [
   ['무제한 대화 (성능에 특화)','High-performance unlimited chat'],
   ['장기기억 슬롯 +10 (100턴 분량)','Long-term memory +10 slots (~100 turns)'],
   ['최대 입력 글자수 2배','2× max input length'],
-  ['>구독하기<','>Subscribe<'],
   ['매월 자동 갱신 · 언제든 취소 가능','Auto-renews monthly · Cancel anytime'],
   ['잠깐 있다 올거지?',"You'll come back soon, right?"],
   ['계속하려면 미르를 충전해주세요.','Top up Credits to keep chatting.'],
@@ -2712,6 +2720,7 @@ function setLang(lang) {
   if (s) s.innerHTML = lang === 'en' ? _applyI18N(_storeKO) : _storeKO;
   if (m) m.innerHTML = lang === 'en' ? _applyI18N(_modalKO) : _modalKO;
   bSelected = lang === 'en' ? '4,000 Credits' : '4,000 미르';
+  updateBuyLabel();
 }
 // A/B × 언어 스위칭
 function switchVersion(v, lang) {
