@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Mirai — Donation System Prototype</title>
-<link rel="stylesheet" href="../shared/styles.css">
+<link rel="stylesheet" href="shared/styles.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{background:#000}
@@ -752,6 +752,7 @@ body.intro-mode .stat-panel{display:none !important}
   display:flex;align-items:center;justify-content:center;
   cursor:pointer;
   opacity:1;transition:opacity 0.6s ease;
+  display:none; /* 사운드 포함 안내 비표시 */
 }
 .bgm-intro.hide{opacity:0;pointer-events:none}
 .bgm-intro-inner{
@@ -1379,9 +1380,359 @@ body.intro-mode .stat-panel{display:none !important}
   background:transparent;
 }
 .content-detail-frame[hidden]{display:none}
+
+/* ═══ 상품 구매 BOTTOM SHEET ═══ */
+.store-backdrop{position:fixed;inset:0;z-index:355;background:rgba(0,0,0,0.34);opacity:0;pointer-events:none;transition:opacity .32s ease}
+.store-backdrop.show{opacity:1;pointer-events:auto}
+.store-sheet{
+  position:fixed;left:0;right:0;bottom:0;z-index:360;
+  margin:0 auto;width:100%;
+  background:var(--bg-elevated);
+  border-radius:24px 24px 0 0;
+  border-top:1px solid rgba(255,255,255,0.06);
+  box-shadow:0 -4px 40px rgba(0,0,0,0.6);
+  transform:translateY(100%);
+  transition:transform .42s cubic-bezier(.16,1,.3,1);
+  display:flex;flex-direction:column;max-height:72dvh;
+}
+.store-sheet.show{transform:translateY(0)}
+@media (min-width:431px){ .store-sheet{ max-width:696px; max-height:66vh } }
+.ss-grabber{width:40px;height:4px;border-radius:2px;background:rgba(255,255,255,0.20);margin:10px auto 0;flex-shrink:0}
+.ss-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 16px calc(28px + env(safe-area-inset-bottom))}
+/* 연/월 토글 — plan-card 안 최상단 */
+#storeSheet .period-pill-wrap{display:flex;justify-content:flex-start;margin:0 0 14px;position:relative;z-index:1}
+#storeSheet .period-pill{display:inline-flex;padding:3px;background:rgba(255,255,255,0.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:999px;gap:2px}
+#storeSheet .pp-seg{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:none;background:transparent;border-radius:999px;font-family:inherit;font-size:12px;font-weight:700;color:var(--label-alternative);cursor:pointer;transition:all .2s;white-space:nowrap}
+#storeSheet .pp-seg:active{transform:scale(0.97)}
+#storeSheet .pp-seg.active{background:var(--primary-normal);color:#fff;box-shadow:0 2px 8px rgba(20,195,145,0.32)}
+#storeSheet .pp-badge{font-size:10px;font-weight:800;padding:2px 6px;border-radius:999px;background:linear-gradient(135deg,#ff8a3d,#ff5a4a);color:#fff;letter-spacing:0.1px;box-shadow:0 1px 3px rgba(255,90,74,0.3)}
+/* MAX 카드 (store-v2 .plan-card 참고) */
+#storeSheet .plan-card{margin:0 0 18px;padding:22px 22px 18px;border-radius:20px;position:relative;overflow:hidden;background:linear-gradient(160deg, #2b2c30 0%, #1f2024 100%);border:1px solid rgba(255,255,255,0.06);box-shadow:0 6px 18px rgba(0,0,0,0.32), 0 1px 0 rgba(255,255,255,0.06) inset}
+#storeSheet .plan-card::after{content:'';position:absolute;right:-30px;top:-50px;width:220px;height:220px;background:url('./images/store-max.png') no-repeat center;background-size:contain;opacity:0.08;pointer-events:none}
+#storeSheet .plan-top{display:flex;align-items:center;gap:8px;margin-bottom:4px;position:relative;z-index:1}
+#storeSheet .plan-icon{width:28px;height:28px;object-fit:contain}
+#storeSheet .plan-name{font-size:22px;font-weight:900;color:var(--label-strong);letter-spacing:-0.5px}
+#storeSheet .plan-discount{display:inline-block;padding:3px 9px;border-radius:6px;background:linear-gradient(135deg,#ff8a3d,#ff5a4a);font-size:11px;font-weight:800;color:#fff;letter-spacing:0.3px;box-shadow:0 2px 8px rgba(255,90,74,0.3);margin-left:4px}
+#storeSheet .plan-pricing{position:relative;z-index:1;margin-bottom:20px;display:flex;flex-direction:row;align-items:baseline;gap:10px;flex-wrap:nowrap}
+#storeSheet .price-original{font-size:13px;font-weight:600;color:var(--label-alternative);text-decoration:line-through}
+#storeSheet .price-main{font-size:26px;font-weight:900;color:var(--label-strong);letter-spacing:-0.8px;line-height:1.1}
+#storeSheet .price-main small{font-size:14px;font-weight:600;color:var(--label-neutral);letter-spacing:0;margin-left:2px}
+#storeSheet .price-hidden{display:none !important}
+#storeSheet .plan-features{display:flex;flex-direction:column;gap:12px;position:relative;z-index:1;list-style:none;margin:0;padding:0}
+#storeSheet .feat{display:flex;align-items:center;gap:12px}
+#storeSheet .feat-icon{width:34px;height:34px;border-radius:9px;background:rgba(20,195,145,0.10);border:1px solid rgba(20,195,145,0.18);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--primary-normal)}
+#storeSheet .feat-icon svg{width:17px;height:17px}
+#storeSheet .feat-text{flex:1;font-size:15px;font-weight:600;color:var(--label-normal);letter-spacing:-0.2px;line-height:1.35;word-break:keep-all}
+#storeSheet .feat-check{width:20px;height:20px;color:var(--primary-normal);flex-shrink:0}
+/* CTA */
+#storeSheet .cta{position:relative;z-index:1;margin-top:18px;width:100%;padding:16px;border-radius:14px;border:none;background:linear-gradient(116deg,var(--primary-normal),var(--primary-heavy));font-family:inherit;font-size:16px;font-weight:800;color:#fff;cursor:pointer;transition:all .2s;box-shadow:0 8px 24px rgba(20,195,145,0.3);letter-spacing:-0.3px}
+#storeSheet .cta:active{transform:scale(0.98)}
+#storeSheet .cta-note{text-align:center;font-size:12px;font-weight:500;color:var(--label-alternative);margin-top:12px}
+/* 미르 구매 그리드 (store 카드 참고) */
+#storeSheet .mir-sec{margin:24px 0 12px}
+#storeSheet .mir-sec-top{margin:14px 0 12px}
+#storeSheet .mir-sec h3{font-size:18px;font-weight:800;color:var(--label-strong);margin:0}
+/* ═══ 시트 위 프리미엄 프로모 배너 ═══ */
+.store-banner{
+  position:absolute;
+  top:-64px;
+  left:16px;right:16px;
+  height:56px;
+  border-radius:14px;
+  padding:6px 10px 6px 14px;
+  display:flex;align-items:center;gap:10px;
+  background:linear-gradient(95deg, #0c2a2a 0%, #0e4540 38%, #136f60 70%, #1a8b75 100%);
+  box-shadow:
+    0 12px 32px rgba(0,0,0,0.5),
+    0 0 0 1px rgba(255,255,255,0.06) inset,
+    0 1px 0 rgba(255,255,255,0.18) inset;
+  overflow:hidden;
+  /* iOS Safari: 부모(.store-sheet)가 transform 갖고 있어서 overflow:hidden + border-radius 안 먹는 버그 — clip-path로 강제 클리핑 */
+  clip-path:inset(0 round 14px);
+  pointer-events:auto;
+  cursor:pointer;
+  isolation:isolate;
+}
+/* 배경 이미지 — 우측에 옅게 깔리는 데코 */
+.store-banner::before{
+  content:'';
+  position:absolute;
+  top:0;right:0;bottom:0;
+  width:65%;
+  background:url('./images/banner-bg.png') right center / cover no-repeat;
+  opacity:0.2;
+  pointer-events:none;
+  z-index:0;
+  border-radius:0 16px 16px 0;
+}
+
+.store-banner-icon{
+  width:68px;height:56px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:flex-start;
+  position:relative;z-index:2;
+  margin:0 0 0 -14px;
+}
+.store-banner-icon img{
+  width:100%;height:100%;
+  object-fit:cover;object-position:left center;
+  filter:
+    drop-shadow(0 4px 8px rgba(20,195,145,0.55))
+    drop-shadow(0 0 12px rgba(123,229,238,0.4));
+}
+
+.store-banner-text{flex:1;min-width:0;position:relative;z-index:2}
+.store-banner-title{
+  font-size:14px;font-weight:800;color:#fff;
+  line-height:1.25;letter-spacing:-0.3px;
+}
+.store-banner-sub{
+  font-size:11px;font-weight:700;
+  color:#FFE08A;
+  margin-top:2px;letter-spacing:-0.1px;
+}
+
+.store-banner-cta{
+  position:relative;z-index:2;
+  padding:9px 16px;border:none;border-radius:10px;
+  background:linear-gradient(135deg,#FF8A6E 0%,#FF6B5E 100%);
+  font-family:inherit;font-size:13px;font-weight:600;
+  color:#fff;cursor:pointer;letter-spacing:-0.2px;
+  white-space:nowrap;
+  box-shadow:0 4px 14px rgba(255,90,74,0.45), 0 1px 0 rgba(255,255,255,0.35) inset;
+  transition:transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s;
+  overflow:hidden;
+}
+.store-banner-cta:hover{
+  box-shadow:0 6px 18px rgba(255,90,74,0.55), 0 1px 0 rgba(255,255,255,0.45) inset;
+}
+.store-banner-cta:active{transform:scale(0.96)}
+#storeSheet .mir-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+#storeSheet .mir-card{
+  position:relative;
+  border-radius:16px;
+  padding:14px 6px 10px;
+  display:flex;flex-direction:column;align-items:center;
+  cursor:pointer;
+  background:
+    radial-gradient(ellipse 90px 50px at 50% 0%, rgba(20,195,145,0.10), transparent 65%),
+    radial-gradient(ellipse 80px 40px at 50% 100%, rgba(40,208,237,0.07), transparent 70%),
+    linear-gradient(160deg, #2b2c30 0%, #1f2024 100%);
+  border:1px solid rgba(255,255,255,0.06);
+  box-shadow:0 6px 18px rgba(0,0,0,0.32), 0 1px 0 rgba(255,255,255,0.06) inset;
+  isolation:isolate;
+  transition:transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .25s, border-color .25s;
+}
+#storeSheet .mir-card::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(circle 1px at 18% 18%, rgba(255,255,255,0.5), transparent 70%),
+    radial-gradient(circle 1px at 76% 24%, rgba(123,229,238,0.55), transparent 70%),
+    radial-gradient(circle 1px at 88% 60%, rgba(20,195,145,0.55), transparent 70%),
+    radial-gradient(circle 1px at 26% 72%, rgba(255,255,255,0.4), transparent 70%);
+  pointer-events:none;
+  opacity:0.85;
+  z-index:0;
+  animation:mirCardTwinkle 2.6s ease-in-out infinite alternate;
+}
+@keyframes mirCardTwinkle{
+  0%{opacity:0.55}
+  100%{opacity:1}
+}
+#storeSheet .mir-card:active{transform:scale(0.96)}
+#storeSheet .mir-badge{
+  position:absolute;top:-8px;right:6px;
+  padding:3px 9px;border-radius:999px;
+  font-size:10px;font-weight:900;color:#fff;
+  background:linear-gradient(135deg,var(--primary-normal),#1ae0a8);
+  box-shadow:0 4px 12px rgba(20,195,145,0.45), 0 0 0 1.5px rgba(255,255,255,0.12) inset;
+  white-space:nowrap;
+  z-index:3;
+  letter-spacing:-0.2px;
+}
+#storeSheet .mir-pile{
+  position:relative;z-index:2;
+  height:50px;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:4px;
+}
+#storeSheet .mir-pile img{
+  max-height:46px;width:auto;object-fit:contain;
+  animation:gemFloat 3s ease-in-out infinite;
+}
+@keyframes gemFloat{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-2.5px)}
+}
+#storeSheet .mir-card:nth-child(2) .mir-pile img{animation-delay:0.4s}
+#storeSheet .mir-card:nth-child(3) .mir-pile img{animation-delay:0.8s}
+#storeSheet .mir-card:nth-child(4) .mir-pile img{animation-delay:0.2s}
+#storeSheet .mir-card:nth-child(5) .mir-pile img{animation-delay:0.6s}
+#storeSheet .mir-card:nth-child(6) .mir-pile img{animation-delay:1.0s}
+@media (prefers-reduced-motion: reduce){
+  #storeSheet .mir-pile img,
+  #storeSheet .mir-card::before{animation:none}
+}
+#storeSheet .mir-amt{
+  position:relative;z-index:2;
+  font-size:12px;font-weight:800;color:var(--label-strong);
+  margin-bottom:0;letter-spacing:-0.3px;
+}
+#storeSheet .mir-bns{
+  position:relative;z-index:2;
+  font-size:10px;font-weight:800;color:var(--primary-normal);
+  margin-bottom:5px;min-height:12px;
+  text-shadow:0 0 6px rgba(20,195,145,0.4);
+  letter-spacing:-0.2px;
+}
+#storeSheet .mir-pbtn{
+  position:relative;z-index:2;
+  width:100%;padding:9px 0;
+  border-radius:10px;border:none;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 55%),
+    linear-gradient(116deg, var(--primary-normal), var(--primary-heavy));
+  color:#fff;
+  font-size:13px;font-weight:900;
+  font-family:inherit;cursor:pointer;
+  margin-top:auto;letter-spacing:-0.3px;
+  box-shadow:
+    0 4px 12px rgba(20,195,145,0.32),
+    0 0 0 1px rgba(255,255,255,0.12) inset,
+    0 1px 0 rgba(255,255,255,0.22) inset;
+  transition:transform .15s;
+}
+#storeSheet .mir-pbtn:active{transform:scale(0.96)}
+/* ═══ VERSION B: 미르 부족 모달 ═══ */
+.b-backdrop{position:fixed;inset:0;z-index:358;background:rgba(0,0,0,0.5);opacity:0;pointer-events:none;transition:opacity .3s ease}
+.b-backdrop.show{opacity:1;pointer-events:auto}
+.b-modal{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(14px);z-index:362;width:calc(100% - 32px);max-width:392px;max-height:74vh;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--bg-elevated);border:1px solid rgba(255,255,255,0.06);border-radius:24px;padding:22px 18px 18px;box-shadow:0 24px 64px rgba(0,0,0,0.55);opacity:0;pointer-events:none;transition:opacity .3s ease, transform .34s cubic-bezier(.16,1,.3,1)}
+.b-modal.show{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+@media (min-width:431px){
+  .b-modal{max-width:412px}
+  /* 데스크탑: 화면 정중앙 */
+  .b-modal.centered{top:50%;bottom:auto !important;max-height:84vh;transform:translate(-50%,-50%) scale(0.98)}
+  .b-modal.centered.show{transform:translate(-50%,-50%) scale(1)}
+}
+/* 구독 풀스크린 오버레이 */
+.sub-overlay{position:fixed;inset:0;z-index:2000;background:var(--bg-alternative);
+  transform:translateY(100%);transition:transform .42s cubic-bezier(.16,1,.3,1);
+  will-change:transform}
+.sub-overlay.show{transform:translateY(0)}
+.sub-overlay iframe{width:100%;height:100%;border:none;display:block;background:var(--bg-alternative)}
+.sub-overlay-close{position:fixed;top:max(12px,env(safe-area-inset-top));right:14px;z-index:2001;
+  width:36px;height:36px;border:none;border-radius:50%;
+  background:rgba(0,0,0,0.45);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;
+  transition:background .15s, transform .15s}
+.sub-overlay-close:hover{background:rgba(0,0,0,0.62)}
+.sub-overlay-close:active{transform:scale(0.92)}
+.sub-overlay-close svg{width:18px;height:18px}
+.b-close{position:fixed;z-index:363;width:36px;height:36px;border:none;border-radius:50%;
+  background:rgba(0,0,0,0.45);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;
+  opacity:0;pointer-events:none;transform:scale(0.9);
+  transition:opacity .2s ease, transform .2s ease, background .15s}
+.b-close.show{opacity:1;pointer-events:auto;transform:scale(1)}
+.b-close:hover{background:rgba(0,0,0,0.6)}
+.b-close:active{transform:scale(0.92)}
+.b-close svg{width:18px;height:18px}
+.b-hook{display:flex;gap:12px;align-items:center;margin-bottom:18px;padding-right:24px}
+.b-hook-avatar{width:76px;height:76px;border-radius:50%;overflow:hidden;flex-shrink:0;border:1.5px solid rgba(255,255,255,0.25)}
+.b-hook-avatar img{width:100%;height:100%;object-fit:cover}
+.b-hook-body{flex:1;min-width:0;padding-top:2px}
+.b-hook-bubble{display:inline-block;background:var(--fill-alternative);color:var(--label-strong);padding:9px 13px;border-radius:13px;border-bottom-left-radius:4px;font-size:14px;font-weight:500;margin-bottom:8px}
+.b-hook-narr{font-size:14px;color:var(--label-neutral);line-height:1.55}
+/* ═══ VERSION B 리디자인: 미르 카드 그리드 (store 카드 UI 재사용) ═══ */
+.b-modal .mir-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.b-modal .mir-card{
+  position:relative;border-radius:16px;padding:16px 6px 12px;
+  display:flex;flex-direction:column;align-items:center;cursor:pointer;
+  background:
+    radial-gradient(ellipse 90px 50px at 50% 0%, rgba(20,195,145,0.10), transparent 65%),
+    radial-gradient(ellipse 80px 40px at 50% 100%, rgba(40,208,237,0.07), transparent 70%),
+    linear-gradient(160deg, #2b2c30 0%, #1f2024 100%);
+  border:1.5px solid rgba(255,255,255,0.06);
+  box-shadow:0 6px 18px rgba(0,0,0,0.32), 0 1px 0 rgba(255,255,255,0.06) inset;
+  isolation:isolate;
+  transition:transform .18s cubic-bezier(.34,1.56,.64,1), border-color .2s, box-shadow .2s;
+}
+.b-modal .mir-card:active{transform:scale(0.96)}
+.b-modal .mir-card.selected{
+  border-color:var(--primary-normal);
+  box-shadow:0 8px 22px rgba(20,195,145,0.30), 0 0 0 1px var(--primary-normal) inset;
+}
+.b-modal .mir-badge{
+  position:absolute;top:-8px;right:6px;padding:3px 9px;border-radius:999px;
+  font-size:10px;font-weight:900;color:#fff;
+  background:linear-gradient(135deg,var(--primary-normal),#1ae0a8);
+  box-shadow:0 4px 12px rgba(20,195,145,0.45), 0 0 0 1.5px rgba(255,255,255,0.12) inset;
+  white-space:nowrap;z-index:3;letter-spacing:-0.2px;
+}
+.b-modal .mir-best{
+  position:absolute;top:-9px;left:50%;transform:translateX(-50%);
+  padding:3px 12px;border-radius:999px;
+  font-size:10px;font-weight:900;color:#fff;letter-spacing:0.4px;
+  background:linear-gradient(135deg,#ff8a3d,#ff5a4a);
+  box-shadow:0 4px 12px rgba(255,90,74,0.45);
+  white-space:nowrap;z-index:4;
+}
+.b-modal .mir-pile{height:44px;display:flex;align-items:center;justify-content:center;margin-bottom:4px}
+.b-modal .mir-pile img{max-height:42px;width:auto;object-fit:contain}
+.b-modal .mir-amt{font-size:12px;font-weight:800;color:var(--label-strong);letter-spacing:-0.3px}
+.b-modal .mir-bns{font-size:10px;font-weight:800;color:var(--primary-normal);min-height:12px;margin-bottom:6px;letter-spacing:-0.2px;text-shadow:0 0 6px rgba(20,195,145,0.4)}
+.b-modal .mir-pbtn{
+  font-size:13px;font-weight:800;color:var(--label-strong);letter-spacing:-0.3px;margin-top:auto;
+  background:none;border:none;padding:0;font-family:inherit;
+}
+/* 더보기 옵션 텍스트 버튼 */
+.b-more{
+  display:flex;align-items:center;justify-content:center;gap:2px;
+  margin:0 auto 16px;padding:6px 12px;border:none;background:none;
+  color:var(--label-alternative);font-family:inherit;font-size:13px;font-weight:600;
+  cursor:pointer;transition:color .15s;
+}
+.b-more:hover{color:var(--label-normal)}
+.b-more:active{opacity:0.6}
+/* 구매 CTA (primary) */
+.b-buy{
+  width:100%;padding:15px;border-radius:14px;border:none;
+  background:linear-gradient(116deg,var(--primary-normal),var(--primary-heavy));
+  color:#fff;font-family:inherit;font-size:16px;font-weight:800;letter-spacing:-0.3px;
+  cursor:pointer;box-shadow:0 8px 24px rgba(20,195,145,0.3);
+  transition:transform .15s;margin-bottom:10px;
+}
+.b-buy:active{transform:scale(0.98)}
+/* 무제한 구독하기 (광고 보기 대체, secondary) */
+.b-subscribe{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;height:52px;border-radius:14px;overflow:hidden;
+  border:1px solid rgba(255,255,255,0.10);background:var(--fill-normal);
+  color:var(--label-strong);font-family:inherit;
+  cursor:pointer;transition:transform .15s, background .15s;
+}
+.b-subscribe:active{transform:scale(0.98);background:var(--fill-strong)}
+.b-sub-icon{width:20px;height:20px;object-fit:contain;flex-shrink:0}
+.b-sub-main{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.b-sub-label{font-size:15px;font-weight:700;letter-spacing:-0.3px;white-space:nowrap}
+.b-sub-badge{
+  flex-shrink:0;padding:3px 8px;border-radius:999px;
+  background:rgba(20,195,145,0.16);color:var(--primary-normal);
+  font-size:11px;font-weight:500;letter-spacing:-0.2px;white-space:nowrap;
+}
+/* ═══ A/B 버전 토글 (데모) ═══ */
+.ver-toggle{position:fixed;top:max(10px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-wrap:wrap;justify-content:center;gap:2px;row-gap:2px;max-width:calc(100vw - 16px);padding:3px;background:rgba(0,0,0,0.5);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:18px;border:1px solid rgba(255,255,255,0.14);box-shadow:0 4px 16px rgba(0,0,0,0.4)}
+.ver-seg{border:none;background:transparent;cursor:pointer;font-family:inherit;padding:5px 10px;border-radius:999px;font-size:11px;font-weight:700;color:var(--label-alternative);transition:all .18s;white-space:nowrap}
+.ver-seg.active{background:var(--primary-normal);color:#fff}
 </style>
 </head>
 <body class="intro-mode">
+<!-- A/B × 언어 토글 -->
+<div class="ver-toggle">
+  <button class="ver-seg active" data-ver="a" data-lang="ko" onclick="switchVersion('a','ko')">미르충전A</button>
+  <button class="ver-seg" data-ver="b" data-lang="ko" onclick="switchVersion('b','ko')">미르충전B</button>
+  <button class="ver-seg" data-ver="a" data-lang="en" onclick="switchVersion('a','en')">미르충전A EN</button>
+  <button class="ver-seg" data-ver="b" data-lang="en" onclick="switchVersion('b','en')">미르충전B EN</button>
+</div>
 <div class="screen" id="app">
   <div class="desktop-blur"></div>
   <div class="top-gradient"></div>
@@ -1664,6 +2015,161 @@ body.intro-mode .stat-panel{display:none !important}
   <div class="sheet-spacer"></div>
 </div>
 
+<!-- 상품 구매 바텀시트 -->
+<div class="store-backdrop" id="storeBackdrop" onclick="closeStoreSheet()"></div>
+<div class="store-sheet" id="storeSheet" role="dialog" aria-label="상품 구매">
+  <!-- 무료 미르 배너 (시트 위 8px floating) — 버전 B에선 숨김 -->
+  <div class="store-banner" id="storeBanner" onclick="claimFreeMir()">
+    <div class="store-banner-icon"><img src="./images/banner-gems.png" alt=""></div>
+    <div class="store-banner-text">
+      <div class="store-banner-title">매일 무료 미르 받기</div>
+      <div class="store-banner-sub">룰렛 · 미션 · 친구 초대 +200미르</div>
+    </div>
+    <button class="store-banner-cta" onclick="event.stopPropagation();claimFreeMir()">지금 받기</button>
+  </div>
+  <div class="ss-grabber"></div>
+  <div class="ss-scroll">
+    <!-- 미르 구매 -->
+    <div class="mir-sec mir-sec-top"><h3>미르 구매</h3></div>
+    <div class="mir-grid">
+      <div class="mir-card" onclick="buyMir('300 미르')">
+        <div class="mir-pile"><img src="./images/store-1.png" alt="300 미르"></div>
+        <div class="mir-amt">300 미르</div>
+        <div class="mir-bns"></div>
+        <button class="mir-pbtn">₩2,200</button>
+      </div>
+      <div class="mir-card" onclick="buyMir('600 미르')">
+        <div class="mir-pile"><img src="./images/store-2.png" alt="600 미르"></div>
+        <div class="mir-amt">600 미르</div>
+        <div class="mir-bns"></div>
+        <button class="mir-pbtn">₩4,400</button>
+      </div>
+      <div class="mir-card" onclick="buyMir('1,200 미르')">
+        <div class="mir-badge">+15%</div>
+        <div class="mir-pile"><img src="./images/store-3.png" alt="1,200 미르"></div>
+        <div class="mir-amt">1,200 미르</div>
+        <div class="mir-bns">+ 180 보너스</div>
+        <button class="mir-pbtn">₩8,800</button>
+      </div>
+      <div class="mir-card" onclick="buyMir('4,000 미르')">
+        <div class="mir-badge">+15%</div>
+        <div class="mir-pile"><img src="./images/store-4.png" alt="4,000 미르"></div>
+        <div class="mir-amt">4,000 미르</div>
+        <div class="mir-bns">+ 600 보너스</div>
+        <button class="mir-pbtn">₩29,000</button>
+      </div>
+      <div class="mir-card" onclick="buyMir('8,000 미르')">
+        <div class="mir-badge">+20%</div>
+        <div class="mir-pile"><img src="./images/store-5.png" alt="8,000 미르"></div>
+        <div class="mir-amt">8,000 미르</div>
+        <div class="mir-bns">+ 1,600 보너스</div>
+        <button class="mir-pbtn">₩58,000</button>
+      </div>
+      <div class="mir-card" onclick="buyMir('16,000 미르')">
+        <div class="mir-badge">+20%</div>
+        <div class="mir-pile"><img src="./images/store-6.png" alt="16,000 미르"></div>
+        <div class="mir-amt">16,000 미르</div>
+        <div class="mir-bns">+ 3,200 보너스</div>
+        <button class="mir-pbtn">₩119,000</button>
+      </div>
+    </div>
+    <!-- 무제한 채팅 (구독) -->
+    <div class="mir-sec"><h3>무제한 채팅</h3></div>
+    <div class="plan-card">
+      <!-- 연/월 토글 (카드 안 최상단) -->
+      <div class="period-pill-wrap">
+        <div class="period-pill">
+          <button class="pp-seg active" data-period="annual" onclick="selectStorePeriod(this)">연간 <span class="pp-badge">24% 할인</span></button>
+          <button class="pp-seg" data-period="monthly" onclick="selectStorePeriod(this)">월간</button>
+        </div>
+      </div>
+      <div class="plan-top">
+        <img class="plan-icon" src="./images/store-380.png" width="28" height="28" alt="MAX">
+        <span class="plan-name">MAX</span>
+      </div>
+      <div class="plan-pricing">
+        <span class="price-original" id="ssPriceOrig">₩55,000</span>
+        <div class="price-main"><span id="ssPriceMain">₩41,583</span><small> / 월</small></div>
+      </div>
+      <ul class="plan-features">
+        <li class="feat">
+          <span class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+          <span class="feat-text">무제한 대화 (성능에 특화)</span>
+          <svg class="feat-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </li>
+        <li class="feat">
+          <span class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a8 8 0 0 0-8 8c0 1.5.4 3 1.1 4.2L4 20l5.8-1.1c1.2.7 2.7 1.1 4.2 1.1a8 8 0 0 0 0-16z"/><circle cx="9" cy="11" r="1"/><circle cx="12" cy="11" r="1"/><circle cx="15" cy="11" r="1"/></svg></span>
+          <span class="feat-text">장기기억 슬롯 +10 (100턴 분량)</span>
+          <svg class="feat-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </li>
+        <li class="feat">
+          <span class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span>
+          <span class="feat-text">최대 입력 글자수 2배</span>
+          <svg class="feat-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </li>
+      </ul>
+      <!-- CTA -->
+      <button class="cta" onclick="buyPlan()">구독하기</button>
+      <div class="cta-note">매월 자동 갱신 · 언제든 취소 가능</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ VERSION B: 미르 부족 모달 ═══ -->
+<!-- ═══ 구독 풀스크린 오버레이 (mirai-subscribe) ═══ -->
+<div class="sub-overlay" id="subOverlay">
+  <button class="sub-overlay-close" onclick="closeSubscribe()" aria-label="닫기">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+  </button>
+  <iframe id="subFrame" title="구독" loading="lazy"></iframe>
+</div>
+
+<div class="b-backdrop" id="bBackdrop"></div>
+<button class="b-close" id="bClose" onclick="closeB()" aria-label="닫기">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+</button>
+<div class="b-modal" id="bModal" role="dialog" aria-label="미르가 부족해요">
+  <div class="b-hook">
+    <div class="b-hook-avatar"><img src="./images/char-profile.png" alt="Adrian"></div>
+    <div class="b-hook-body">
+      <div class="b-hook-bubble">잠깐 있다 올거지?</div>
+      <div class="b-hook-narr">계속하려면 미르를 충전해주세요.</div>
+    </div>
+  </div>
+  <div class="mir-grid">
+    <div class="mir-card" onclick="selectBCard(this,'1,200 미르')">
+      <div class="mir-pile"><img src="./images/store-3.png" alt="1,200 미르"></div>
+      <div class="mir-amt">1,200 미르</div>
+      <div class="mir-bns">+ 180 보너스</div>
+      <button class="mir-pbtn">₩8,800</button>
+    </div>
+    <div class="mir-card selected" onclick="selectBCard(this,'4,000 미르')">
+      <div class="mir-best">BEST</div>
+      <div class="mir-pile"><img src="./images/store-4.png" alt="4,000 미르"></div>
+      <div class="mir-amt">4,000 미르</div>
+      <div class="mir-bns">+ 600 보너스</div>
+      <button class="mir-pbtn">₩29,000</button>
+    </div>
+    <div class="mir-card" onclick="selectBCard(this,'8,000 미르')">
+      <div class="mir-pile"><img src="./images/store-5.png" alt="8,000 미르"></div>
+      <div class="mir-amt">8,000 미르</div>
+      <div class="mir-bns">+ 1,600 보너스</div>
+      <button class="mir-pbtn">₩58,000</button>
+    </div>
+  </div>
+  <button class="b-more" onclick="closeB();openStoreSheet()">더보기 옵션
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+  </button>
+  <button class="b-buy" onclick="buyMir(bSelected)">구매하기</button>
+  <button class="b-subscribe" onclick="openSubscribe()">
+    <span class="b-sub-main">
+      <img class="b-sub-icon" src="./images/store-380.png" alt="MAX">
+      <span class="b-sub-label">무제한 채팅하기</span>
+    </span>
+    <span class="b-sub-badge">+12 추가기능 해금</span>
+  </button>
+</div>
+
 <!-- Edit Modal -->
 <div class="edit-modal" id="editModal">
   <div class="ds-handle"></div>
@@ -1700,7 +2206,7 @@ body.intro-mode .stat-panel{display:none !important}
         <div class="ds-title">오늘의 무료 수정을 모두 사용했어요</div>
         <div class="ds-subtitle">구독하면 무제한으로 수정할 수 있어요</div>
       </div>
-      <button class="ds-confirm" onclick="showToast('구독 페이지로 이동합니다')">구독하고 무제한 수정하기</button>
+      <button class="ds-confirm" onclick="cancelEdit();setTimeout(openStoreSheet,200)">구독하고 무제한 수정하기</button>
       <div class="edit-exhausted-divider"><span>또는</span></div>
       <button class="edit-mir-buy" onclick="buyEditWithMir()">
         <img src="./images/mir.png" alt="미르" style="width:16px;height:16px;vertical-align:-3px;margin-right:4px">5 미르로 1회 수정하기
@@ -1714,11 +2220,11 @@ body.intro-mode .stat-panel{display:none !important}
 <div class="settings-screen" id="settingsScreen">
   <div class="settings-header">
     <div class="settings-header-left">
-      <span class="settings-model-chip">
+      <span class="settings-model-chip" onclick="openStoreFromSettings()" style="cursor:pointer">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L13.7 10.3L22 12L13.7 13.7L12 22L10.3 13.7L2 12L10.3 10.3Z"/></svg>
         Free
       </span>
-      <span class="settings-mir-chip">
+      <span class="settings-mir-chip" onclick="openStoreFromSettings()" style="cursor:pointer">
         <img src="./images/mir.png" alt="미르"> 33
       </span>
     </div>
@@ -2065,6 +2571,163 @@ function closeOocEdit() {
     }
   }, 300);
 }
+// ═══ 상품 구매 바텀시트 ═══
+function openStoreSheet() {
+  document.body.classList.remove('intro-mode'); // 헤더 노출 (A/B 일관)
+  const bd = document.getElementById('storeBackdrop');
+  if (bd) bd.classList.add('show');
+  document.querySelectorAll('.tap-coach').forEach(c => { c.classList.remove('show'); c.setAttribute('hidden', ''); });
+  // 무료 미르 배너: 버전 B에선 숨김, A에선 노출
+  const banner = document.getElementById('storeBanner');
+  if (banner) {
+    const ver = document.querySelector('.ver-seg.active')?.dataset.ver;
+    banner.style.display = ver === 'b' ? 'none' : '';
+  }
+  document.getElementById('storeSheet').classList.add('show');
+}
+function closeStoreSheet() {
+  document.getElementById('storeSheet').classList.remove('show');
+  const bd = document.getElementById('storeBackdrop');
+  if (bd) bd.classList.remove('show');
+  const banner = document.getElementById('storeBanner');
+  if (banner) banner.style.display = 'none'; // 시트 닫으면 배너도 확실히 숨김
+}
+function openStoreFromSettings() {
+  if (typeof closeSettings === 'function') closeSettings();
+  setTimeout(openStoreSheet, 260);
+}
+function selectStorePeriod(btn) {
+  document.querySelectorAll('#storeSheet .pp-seg').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const isAnnual = btn.dataset.period === 'annual';
+  document.getElementById('ssPriceMain').textContent = isAnnual ? '₩41,583' : '₩55,000';
+  const orig = document.getElementById('ssPriceOrig');
+  const disc = document.getElementById('ssPlanDiscount');
+  if (isAnnual) { orig.classList.remove('price-hidden'); disc.classList.remove('price-hidden'); }
+  else { orig.classList.add('price-hidden'); disc.classList.add('price-hidden'); }
+}
+let curLang = 'ko';
+// 구독 풀스크린 오버레이 (mirai-subscribe/index.html)
+function openSubscribe() {
+  const ov = document.getElementById('subOverlay');
+  const fr = document.getElementById('subFrame');
+  if (fr && !fr.getAttribute('src')) fr.setAttribute('src', '../mirai-subscribe/index.html'); // 최초 1회 로드
+  if (ov) ov.classList.add('show');
+}
+function closeSubscribe() {
+  const ov = document.getElementById('subOverlay');
+  if (ov) ov.classList.remove('show');
+}
+function buyPlan() { openSubscribe(); }
+function buyMir(label) { showToast(curLang === 'en' ? '💎 Buy ' + label + ' (payment coming soon)' : '💎 ' + label + ' 구매 (결제 연동 예정)'); }
+function claimFreeMir() { showToast(curLang === 'en' ? '🎁 Claim free Credits (event page coming soon)' : '🎁 무료 미르 받기 (이벤트 페이지 연동 예정)'); }
+// ═══ 버전 B: 미르 부족 모달 ═══
+let bSelected = '4,000 미르'; // 기본 선택: 가운데(BEST) 카드
+function selectBCard(el, label) {
+  document.querySelectorAll('#bModal .mir-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  bSelected = label;
+}
+function openB() {
+  document.body.classList.remove('intro-mode'); // 헤더·입력창 노출
+  document.querySelectorAll('.tap-coach').forEach(c => { c.classList.remove('show'); c.setAttribute('hidden', ''); });
+  const modal = document.getElementById('bModal');
+  const bd = document.getElementById('bBackdrop');
+  const banner = document.getElementById('storeBanner');
+  if (banner) banner.style.display = 'none'; // 버전 B에선 배너 숨김
+  const desktop = window.matchMedia('(min-width:431px)').matches;
+  let inputTop = 96;
+  if (desktop) {
+    // 데스크탑: 화면 정중앙
+    modal.classList.add('centered');
+    modal.style.bottom = '';
+    bd.style.bottom = '';
+  } else {
+    // 모바일: 입력창 바로 위에 앵커 (입력바는 딤에서 제외)
+    modal.classList.remove('centered');
+    const wrap = document.querySelector('.input-wrap');
+    if (wrap) {
+      const r = wrap.getBoundingClientRect();
+      if (r.height > 0) { const v = window.innerHeight - r.top; if (v > 0 && v < window.innerHeight) inputTop = v; }
+    }
+    modal.style.bottom = (inputTop + 12) + 'px';
+    bd.style.bottom = inputTop + 'px';
+  }
+  bd.classList.add('show');
+  modal.classList.add('show');
+  // 닫기 버튼: 모달 밖(상단 우측)에 배치 — 모달 최종 위치 기준
+  requestAnimationFrame(() => {
+    const close = document.getElementById('bClose');
+    if (!close) return;
+    const box = modal.getBoundingClientRect();
+    const top = desktop ? (window.innerHeight - box.height) / 2
+                        : window.innerHeight - (inputTop + 12) - box.height;
+    close.style.top = Math.max(8, top - 44) + 'px';
+    close.style.left = (window.innerWidth / 2 - 18) + 'px'; // 가로 중앙 (버튼 36px)
+    close.classList.add('show');
+  });
+}
+function closeB() {
+  document.getElementById('bModal').classList.remove('show');
+  document.getElementById('bBackdrop').classList.remove('show');
+  document.getElementById('bClose').classList.remove('show');
+}
+// ═══ 언어(KO/EN) 스왑 — store 시트 + B 모달 텍스트 ═══
+let _storeKO = null, _modalKO = null;
+const I18N = [
+  ['매일 무료 미르 받기','Earn free Credits daily'],
+  ['룰렛 · 미션 · 친구 초대 +200미르','Roulette · Missions · Invite +200'],
+  ['>지금 받기<','>Claim<'],
+  ['<h3>미르 구매</h3>','<h3>Buy Credits</h3>'],
+  ['<h3>무제한 채팅</h3>','<h3>Unlimited Chat</h3>'],
+  ['300 미르','300 Credits'],['600 미르','600 Credits'],['1,200 미르','1,200 Credits'],
+  ['4,000 미르','4,000 Credits'],['8,000 미르','8,000 Credits'],['16,000 미르','16,000 Credits'],
+  ['+ 180 보너스','+180 bonus'],['+ 600 보너스','+600 bonus'],
+  ['+ 1,600 보너스','+1,600 bonus'],['+ 3,200 보너스','+3,200 bonus'],
+  ['>연간 ','>Yearly '],['24% 할인','24% off'],['>월간<','>Monthly<'],
+  ['무제한 대화 (성능에 특화)','High-performance unlimited chat'],
+  ['장기기억 슬롯 +10 (100턴 분량)','Long-term memory +10 slots (~100 turns)'],
+  ['최대 입력 글자수 2배','2× max input length'],
+  ['>구독하기<','>Subscribe<'],
+  ['매월 자동 갱신 · 언제든 취소 가능','Auto-renews monthly · Cancel anytime'],
+  ['잠깐 있다 올거지?',"You'll come back soon, right?"],
+  ['계속하려면 미르를 충전해주세요.','Top up Credits to keep chatting.'],
+  ['더보기 옵션','More options'],
+  ['>구매하기<','>Buy<'],
+  ['무제한 채팅하기','Go Unlimited'],
+  ['+12 추가기능 해금','+ 12 features'],
+  ['alt="미르"','alt="Credits"'],
+];
+function _applyI18N(html) { for (const p of I18N) html = html.split(p[0]).join(p[1]); return html; }
+function snapshotKO() {
+  const s = document.getElementById('storeSheet'); if (s && _storeKO === null) _storeKO = s.innerHTML;
+  const m = document.getElementById('bModal');    if (m && _modalKO === null) _modalKO = m.innerHTML;
+}
+function setLang(lang) {
+  snapshotKO();
+  curLang = lang;
+  const s = document.getElementById('storeSheet'), m = document.getElementById('bModal');
+  if (s) s.innerHTML = lang === 'en' ? _applyI18N(_storeKO) : _storeKO;
+  if (m) m.innerHTML = lang === 'en' ? _applyI18N(_modalKO) : _modalKO;
+  bSelected = lang === 'en' ? '4,000 Credits' : '4,000 미르';
+}
+// A/B × 언어 스위칭
+function switchVersion(v, lang) {
+  lang = lang || curLang;
+  document.querySelectorAll('.ver-seg').forEach(b => b.classList.toggle('active', b.dataset.ver === v && b.dataset.lang === lang));
+  setLang(lang);
+  if (v === 'b') { closeStoreSheet(); openB(); }
+  else { closeB(); openStoreSheet(); }
+}
+// 데모: 로드 시 자동 노출 (?v=b → 버전 B, ?lang=en → 영어)
+window.addEventListener('load', () => {
+  const p = new URLSearchParams(location.search);
+  const v = p.get('v') === 'b' ? 'b' : 'a';
+  const lang = p.get('lang') === 'en' ? 'en' : 'ko';
+  document.querySelectorAll('.ver-seg').forEach(b => b.classList.toggle('active', b.dataset.ver === v && b.dataset.lang === lang));
+  setTimeout(() => { setLang(lang); if (v === 'b') openB(); else openStoreSheet(); }, 500);
+});
+
 function closeModelSheet() {
   document.getElementById('modelDropdown').classList.remove('show');
 }
@@ -2319,6 +2982,8 @@ function showDialogue(idx, skipTTS) {
       el.innerHTML = dlg.lines.map(l => '<div class="ln">' + l + '</div>').join('');
       // 타이핑 끝 → 탭 힌트 리플 시작 (마지막 페이지 제외)
       if (tapHintRipple && !isLast) tapHintRipple.classList.add('show');
+      // 첫 다이얼로그 완료 시 터치 안내 코치마크 (1회)
+      if (!isLast) showTapCoach();
       return;
     }
     const c = fullText[charIdx];
@@ -3039,7 +3704,7 @@ function buyEditWithMir() {
   const balanceEl = document.getElementById('mirBalance');
   const balance = parseInt(balanceEl.textContent.replace(/,/g, ''));
   if (balance < EDIT_MIR_COST) {
-    showToast('미르가 부족해요');
+    showToast(curLang === 'en' ? "You're out of Credits" : '미르가 부족해요');
     return;
   }
   // 미르 차감 + 1회 추가
