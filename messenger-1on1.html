@@ -299,6 +299,41 @@ body.messenger-mode .desktop-blur{display:none}
   font-size:14px;
 }
 
+/* 소개(콘텐츠) 버블 — 상단 태그라인 + 접기/펼치기 */
+.intro-bubble{
+  align-self:stretch;
+  background:rgba(28,28,30,0.9);
+  border-radius:18px;
+  padding:14px 17px 15px;
+  margin:2px 0 10px;
+  position:relative;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.intro-bubble .intro-text{
+  font-size:15px;line-height:1.55;letter-spacing:-0.2px;
+  color:rgba(255,255,255,0.62);
+  overflow-wrap:break-word;
+}
+.intro-bubble .intro-text b{
+  color:#fff;font-weight:700;margin-right:7px;
+}
+.intro-bubble:not(.expanded) .intro-text{
+  display:-webkit-box;
+  -webkit-line-clamp:4;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.intro-chevron{
+  position:absolute;right:13px;bottom:11px;
+  width:18px;height:18px;
+  display:flex;align-items:center;justify-content:center;
+  color:rgba(255,255,255,0.85);
+  transition:transform .25s ease;
+  pointer-events:none;
+}
+.intro-bubble.expanded .intro-chevron{transform:rotate(180deg)}
+
 /* 메시지 컨테이너 */
 .msg{max-width:520px}
 @media (min-width:769px){.msg{max-width:600px}}
@@ -2655,6 +2690,8 @@ const DIALOGUES = []; // 기존 미연시 로직 호환용 빈 배열
 const KEN_AVATARS = {
   Cash:  './images/kennedy-cash.webp',
 };
+const INTRO_TEXT = "Cash is 28, the eldest son of the Kennedy estate — broad-shouldered, gravel-voiced, a mechanic's calloused hands beneath a tailored dinner jacket. You've summered on his family's Aegean terraces for eight years now: close enough to be called family, never once close enough to be his. Tonight the party thins out, Stacey slips back inside to the dance floor, and the careful distance Cash has kept for eight long summers finally gives way. He's done pretending he never noticed you.";
+
 const MESSAGES = [
   {type:'image', img:'./images/kennedy-cash.webp'},
   {type:'narration', text:"Stacey hugged you goodbye and slipped back into the party. Cash peels off the balcony railing and reaches you before the door even shuts — 28, broad-shouldered, gravel voice, grease-streaked fingers grazing your hip."},
