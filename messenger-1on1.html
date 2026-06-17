@@ -866,6 +866,7 @@ body.messenger-mode .bottom-gradient{
 }
 .send-btn:active{transform:scale(0.92)}
 .send-btn:disabled{opacity:0.5;pointer-events:none}
+.send-btn:disabled{opacity:0.35;cursor:not-allowed}
 .send-btn svg{width:40px;height:40px}
 .send-btn img{display:block;width:40px;height:40px}
 
@@ -1882,7 +1883,7 @@ body.intro-mode .stat-panel{display:none !important}
               </div>
             </div>
           </div>
-          <button class="send-btn" onclick="sendMessage()"><img src="./images/icon/send.svg?v=2" alt="전송"></button>
+          <button class="send-btn" id="sendBtn" onclick="sendMessage()"><img src="./images/icon/send.svg?v=2" alt="전송"></button>
         </div>
       </div>
     </div>
@@ -2540,6 +2541,7 @@ async function renderChatFeed() {
   timeHeader.textContent = 'May 12, 2026';
   feed.appendChild(timeHeader);
 
+  setSendDisabled(true);              // 첫 대사 출력 중 보내기 비활성
   for (const m of MESSAGES) {
     if (m.type === 'narration') {
       await appendNarrationBubble(m.text);
@@ -2552,6 +2554,7 @@ async function renderChatFeed() {
       await wait(450);
     }
   }
+  setSendDisabled(false);             // 첫 대사 완료 후 복구
 }
 
 function wait(ms){return new Promise(r => setTimeout(r, ms))}
@@ -3078,7 +3081,15 @@ document.getElementById('overlayBackdrop').addEventListener('click', () => {
 
 // Toast
 // ═══ SEND MESSAGE (메신저 모드 — 유저 버블 추가) ═══
+// 캐릭터 답장 입력 중 보내기 버튼 비활성/복구
+function setSendDisabled(on){
+  const b = document.getElementById('sendBtn');
+  if (b) b.disabled = !!on;
+}
+
 function sendMessage() {
+  const btn = document.getElementById('sendBtn');
+  if (btn && btn.disabled) return;
   const input = document.querySelector('.input-field');
   const text = input.value.trim();
   if (!text) return;
@@ -3156,6 +3167,7 @@ const _SUGGESTIONS = [
 ];
 
 function scheduleAIReply(){
+  setSendDisabled(true);
   const r = _AI_REPLIES[Math.floor(Math.random() * _AI_REPLIES.length)];
   const label = document.querySelector('.progress-label');
   const loading = document.getElementById('progressLoading');
@@ -3233,8 +3245,9 @@ function appendCharBubble(m){
     if (i >= fullChars.length) {
       clearInterval(tick);
       cursorEl.remove();
-      // 타이핑 끝난 뒤 액션 아이콘 노출
+      // 타이핑 끝난 뒤 액션 아이콘 노출 + 보내기 버튼 복구
       stackEl.insertAdjacentHTML('beforeend', _msgActionsHtml());
+      setSendDisabled(false);
       return;
     }
     i++;
