@@ -269,7 +269,7 @@ body.messenger-mode .desktop-blur{display:none}
   bottom:0;
   z-index:1;
   overflow-y:auto;-webkit-overflow-scrolling:touch;
-  padding:24px 16px max(180px, calc(env(safe-area-inset-bottom) + 160px));
+  padding:12px 16px max(180px, calc(env(safe-area-inset-bottom) + 160px));
   display:flex;flex-direction:column;gap:12px;
   scrollbar-width:none;
 }
@@ -278,7 +278,7 @@ body.messenger-mode .desktop-blur{display:none}
   .chat-feed{padding-left:24px;padding-right:24px}
 }
 @media (min-width:769px){
-  .chat-feed{max-width:696px;margin:0 auto;left:0;right:0;padding-top:32px}
+  .chat-feed{max-width:696px;margin:0 auto;left:0;right:0;padding-top:14px}
   .chat-bg{left:50%;right:auto;transform:translateX(-50%);max-width:696px}
 }
 @media (min-width:1024px){
@@ -773,7 +773,8 @@ body.messenger-mode .bottom-gradient{
 }
 .progress-label{font-size:13px;color:var(--label-alternative);font-weight:400}
 .progress-label .progress-count{color:var(--label-strong)}
-.user-persona-label{display:inline-flex;align-items:center;gap:6px}
+.user-persona-label{display:inline-flex;align-items:center;gap:6px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.user-persona-label:active{opacity:0.6}
 .user-persona-label .persona-avatar{
   width:18px;height:18px;border-radius:50%;
   display:inline-flex;align-items:center;justify-content:center;
@@ -1809,7 +1810,7 @@ body.intro-mode .stat-panel{display:none !important}
       </div>
     </div>
     <div class="progress-row">
-      <span class="progress-label user-persona-label">
+      <span class="progress-label user-persona-label" role="button" tabindex="0" onclick="showToast('페르소나 페이지가 연결됩니다')">
         <span class="persona-avatar">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0 2c-4.42 0-8 2.69-8 6v2h16v-2c0-3.31-3.58-6-8-6z"/></svg>
         </span>
