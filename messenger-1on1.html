@@ -253,8 +253,8 @@ body.messenger-mode .top-gradient{display:none !important}
 
 /* 풀뷰포트 배경 (미연시 UI와 동일 패턴) */
 .chat-bg{
-  position:fixed;inset:0;z-index:0;pointer-events:none;
-  background-image:url('./images/kennedy-bg.webp');
+  position:fixed;top:0;bottom:0;left:0;right:0;width:100%;z-index:0;pointer-events:none;
+  background-image:url('./images/bg-chat.png');
   background-size:cover;background-position:center center;
 }
 .chat-bg::after{
@@ -279,9 +279,11 @@ body.messenger-mode .desktop-blur{display:none}
 }
 @media (min-width:769px){
   .chat-feed{max-width:696px;margin:0 auto;left:0;right:0;padding-top:32px}
+  .chat-bg{left:50%;right:auto;transform:translateX(-50%);max-width:696px}
 }
 @media (min-width:1024px){
   .chat-feed{max-width:940px}
+  .chat-bg{max-width:940px}
 }
 
 /* 시간 헤더 */
@@ -302,7 +304,7 @@ body.messenger-mode .desktop-blur{display:none}
 /* 소개(콘텐츠) 버블 — 상단 태그라인 + 접기/펼치기 */
 .intro-bubble{
   align-self:stretch;
-  background:rgba(28,28,30,0.9);
+  background:rgba(48,49,53,0.92);
   border-radius:18px;
   padding:14px 17px 15px;
   margin:2px 0 10px;
@@ -354,6 +356,28 @@ body.messenger-mode .desktop-blur{display:none}
   object-fit:cover;flex-shrink:0;
   box-shadow:inset 0 0 0 1px rgba(0,0,0,0.35);
 }
+/* 이름 옆 TTS 재생 버튼 */
+.msg-tts-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:20px;height:20px;padding:0;margin-left:-3px;
+  background:none;border:none;cursor:pointer;flex-shrink:0;
+  color:rgba(255,255,255,0.42);transition:color .15s;
+}
+.msg-tts-btn .msg-tts-ico{width:14px;height:14px}
+@media (hover:hover){.msg-tts-btn:hover{color:rgba(255,255,255,0.8)}}
+.msg-tts-btn:active{color:#fff}
+.msg-tts-btn.playing{color:#fff}
+/* 재생 중 = 음파 애니메이션, idle = 스피커 아이콘 토글 */
+.msg-tts-wave{display:none;align-items:flex-end;justify-content:center;gap:2px;height:14px}
+.msg-tts-btn.playing .msg-tts-ico{display:none}
+.msg-tts-btn.playing .msg-tts-wave{display:inline-flex}
+.msg-tts-wave span{
+  width:2px;border-radius:1px;background:currentColor;
+  animation:ttsWave 0.8s ease-in-out infinite;
+}
+.msg-tts-wave span:nth-child(1){height:5px;animation-delay:0s}
+.msg-tts-wave span:nth-child(2){height:12px;animation-delay:0.15s}
+.msg-tts-wave span:nth-child(3){height:7px;animation-delay:0.3s}
 
 /* 버블 공통 */
 .msg-bubble{
@@ -456,6 +480,9 @@ body.messenger-mode .desktop-blur{display:none}
 }
 @keyframes imgFadeIn{to{opacity:1}}
 .msg-img img{display:block;width:100%;height:100%;object-fit:cover;object-position:center top}
+/* 유저가 보낸 이미지 — 원본 비율 유지 */
+.msg-img.user-img{width:auto;max-width:220px;aspect-ratio:auto;max-height:300px}
+.msg-img.user-img img{width:100%;height:auto;object-fit:contain;object-position:center}
 
 /* 잠긴 이미지 버블 */
 .msg-img.locked{cursor:pointer}
@@ -526,7 +553,7 @@ body.messenger-mode .bottom-gradient{
 }
 .bottom > *{pointer-events:auto}
 .bottom-spacer{
-  height:28px;flex-shrink:0;pointer-events:none;
+  height:max(12px, env(safe-area-inset-bottom));flex-shrink:0;pointer-events:none;
 }
 
 /* Dialogue */
@@ -1801,11 +1828,13 @@ body.intro-mode .stat-panel{display:none !important}
       </div>
     </div>
     <div class="input-wrap">
+      <input type="file" id="imgFileInput" accept="image/*" hidden onchange="onImagePicked(event)">
       <div class="input-row-top">
         <textarea class="input-field" placeholder="메시지를 입력하세요..." rows="1"></textarea>
       </div>
       <div class="input-row-bottom">
         <div class="input-actions-left">
+          <button class="act-circle" onclick="openImagePicker()" title="이미지 전송"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></button>
           <button class="act-circle" id="choiceToggleBtn" onclick="toggleChoices()" title="선택지"><img src="./images/icon/bulb.svg?v=7" alt="선택지"></button>
           <div class="ooc-wrap">
             <button class="act-circle" id="oocToggleBtn" onclick="toggleOocMenu(event)" title="OOC"><img src="./images/icon/magic-wand.svg?v=7" alt="OOC"></button>
@@ -2494,6 +2523,15 @@ async function renderChatFeed() {
   const feed = document.getElementById('chatFeed');
   if (!feed) return;
   feed.innerHTML = '';
+
+  const intro = document.createElement('div');
+  intro.className = 'intro-bubble';
+  intro.onclick = () => intro.classList.toggle('expanded');
+  intro.innerHTML = `
+    <div class="intro-text"><b>소개</b>${escapeHtml(INTRO_TEXT)}</div>
+    <span class="intro-chevron"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>`;
+  feed.appendChild(intro);
+
   const timeHeader = document.createElement('div');
   timeHeader.className = 'msg-time';
   timeHeader.textContent = 'May 12, 2026';
@@ -2568,6 +2606,7 @@ function appendCharBubbleAnimated(m){
         <div class="msg-header">
           <img class="msg-avatar" src="${avatar}" alt="">
           <span class="msg-name">${escapeHtml(m.speaker)}</span>
+          <button class="msg-tts-btn" data-tts="${ttsAttr(m.text)}" onclick="playMsgTTS(this)" aria-label="음성 재생" title="음성 재생"><svg class="msg-tts-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a9 9 0 0 1 0 14"/></svg><span class="msg-tts-wave"><span></span><span></span><span></span></span></button>
         </div>
         <div class="msg-bubble"><span class="msg-typed"></span><span class="msg-cursor"></span></div>
       </div>`;
@@ -2603,6 +2642,27 @@ function appendCharBubbleAnimated(m){
 
 function escapeHtml(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// 메시지 버블 TTS 재생 (유저가 직접 누름 → 볼륨 1 고정)
+function ttsAttr(s){
+  return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function playMsgTTS(btn){
+  const text = (btn.getAttribute('data-tts') || '').trim();
+  const wasPlaying = btn.classList.contains('playing');
+  document.querySelectorAll('.msg-tts-btn.playing').forEach(b => b.classList.remove('playing'));
+  speechSynthesis.cancel();
+  if (wasPlaying || !text) return;            // 같은 버튼 재클릭 = 정지
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'en-US';
+  utter.rate = 0.95;
+  utter.pitch = 1.0;
+  utter.volume = 1;
+  btn.classList.add('playing');
+  utter.onend = () => btn.classList.remove('playing');
+  utter.onerror = () => btn.classList.remove('playing');
+  speechSynthesis.speak(utter);
 }
 
 function toggleStatPanel() {
@@ -2690,10 +2750,9 @@ const DIALOGUES = []; // 기존 미연시 로직 호환용 빈 배열
 const KEN_AVATARS = {
   Cash:  './images/kennedy-cash.webp',
 };
-const INTRO_TEXT = "Cash is 28, the eldest son of the Kennedy estate — broad-shouldered, gravel-voiced, a mechanic's calloused hands beneath a tailored dinner jacket. You've summered on his family's Aegean terraces for eight years now: close enough to be called family, never once close enough to be his. Tonight the party thins out, Stacey slips back inside to the dance floor, and the careful distance Cash has kept for eight long summers finally gives way. He's done pretending he never noticed you.";
+const INTRO_TEXT = "Cash is 28, the eldest son of the Kennedy estate: broad-shouldered, gravel-voiced, a mechanic's calloused hands hidden beneath a tailored dinner jacket he never looks quite comfortable in. You've summered on his family's sun-bleached Aegean terraces for eight years now, close enough to be called family at every dinner, never once close enough to be his. He taught you to drive the old coupe down the cliff road, fixed your bike a hundred times, and pretended not to watch you cross a room. Tonight the party finally thins out, Stacey slips back inside to the dance floor, the music softens to something slow, and the careful distance Cash has held for eight long summers quietly gives way. He's done pretending he never noticed you, and he wants you to know exactly what that means.";
 
 const MESSAGES = [
-  {type:'image', img:'./images/kennedy-cash.webp'},
   {type:'narration', text:"Stacey hugged you goodbye and slipped back into the party. Cash peels off the balcony railing and reaches you before the door even shuts — 28, broad-shouldered, gravel voice, grease-streaked fingers grazing your hip."},
   {type:'dialogue', speaker:'Cash', text:"Eight summers I watched you grow up. Tonight I'm done pretending."},
 ];
@@ -3049,6 +3108,34 @@ function appendUserBubble(text) {
   scheduleAIReply();
 }
 
+// ═══ 이미지 전송 ═══
+function openImagePicker() {
+  const inp = document.getElementById('imgFileInput');
+  if (inp) inp.click();
+}
+function onImagePicked(e) {
+  const file = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!file || !file.type.startsWith('image/')) return;
+  const reader = new FileReader();
+  reader.onload = () => appendUserImageBubble(reader.result);
+  reader.readAsDataURL(file);
+}
+function appendUserImageBubble(src) {
+  const feed = document.getElementById('chatFeed');
+  if (!feed) return;
+  const el = document.createElement('div');
+  el.className = 'msg msg-user';
+  el.innerHTML = `
+    <div class="msg-stack">
+      <div class="msg-img user-img"><img src="${src}" alt=""></div>
+      ${_msgActionsHtml()}
+    </div>`;
+  feed.appendChild(el);
+  setTimeout(() => { feed.scrollTop = feed.scrollHeight; }, 0);
+  scheduleAIReply();
+}
+
 const _AI_REPLIES = [
   {speaker:'Cash', narr:"Cash steps closer, the heat of him filling the space between you.", text:"Take your time. I'm not going anywhere."},
   {speaker:'Cash', narr:"He tilts his head, eyes thoughtful, jaw working.", text:"That's not an answer. Try again."},
@@ -3121,6 +3208,7 @@ function appendCharBubble(m){
       <div class="msg-header">
         <img class="msg-avatar" src="${avatar}" alt="">
         <span class="msg-name">${escapeHtml(m.speaker)}</span>
+        <button class="msg-tts-btn" data-tts="${ttsAttr(m.text)}" onclick="playMsgTTS(this)" aria-label="음성 재생" title="음성 재생"><svg class="msg-tts-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a9 9 0 0 1 0 14"/></svg><span class="msg-tts-wave"><span></span><span></span><span></span></span></button>
       </div>
       <div class="msg-bubble"><span class="msg-typed"></span><span class="msg-cursor"></span></div>
     </div>`;
