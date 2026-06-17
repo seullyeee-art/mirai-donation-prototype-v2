@@ -3099,6 +3099,7 @@ function _msgActionsHtml(){
 function appendUserBubble(text) {
   const feed = document.getElementById('chatFeed');
   if (!feed) return;
+  removeSuggestions();
   const el = document.createElement('div');
   el.className = 'msg msg-user';
   el.innerHTML = `
@@ -3127,6 +3128,7 @@ function onImagePicked(e) {
 function appendUserImageBubble(src) {
   const feed = document.getElementById('chatFeed');
   if (!feed) return;
+  removeSuggestions();
   const el = document.createElement('div');
   el.className = 'msg msg-user';
   el.innerHTML = `
@@ -3164,8 +3166,8 @@ function scheduleAIReply(){
     if (loading) loading.style.display = 'none';
     if (label) label.style.display = '';
     appendCharBubble(r);
-    // 타이핑 소요시간 추정 + 2초 더 기다린 후 페이드인
-    const typingMs = ((r.narr ? r.narr.length + 1 : 0) + (r.text || '').length) * 32 + 2000;
+    // 타이핑 소요시간 추정 + 짧은 버퍼 후 페이드인
+    const typingMs = ((r.narr ? r.narr.length + 1 : 0) + (r.text || '').length) * 32 + 500;
     setTimeout(showSuggestions, typingMs);
   }, 2000);
 }
