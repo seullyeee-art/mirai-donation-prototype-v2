@@ -274,6 +274,8 @@ body.messenger-mode .desktop-blur{display:none}
   scrollbar-width:none;
 }
 .chat-feed::-webkit-scrollbar{display:none}
+/* 메시지를 하단부터 시작 (적을 땐 바닥 정렬, 많아지면 위로 쌓이며 정상 스크롤) */
+.chat-feed > :first-child{margin-top:auto}
 @media (min-width:431px){
   .chat-feed{padding-left:24px;padding-right:24px}
 }
