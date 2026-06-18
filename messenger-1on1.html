@@ -311,9 +311,10 @@ body.messenger-mode .desktop-blur{display:none}
   padding:14px 17px 15px;
   margin:2px 0 10px;
   position:relative;
-  cursor:pointer;
+  cursor:default;
   -webkit-tap-highlight-color:transparent;
 }
+.intro-bubble.has-more{cursor:pointer}
 .intro-bubble .intro-text{
   font-size:15px;line-height:1.55;letter-spacing:-0.2px;
   color:rgba(255,255,255,0.62);
@@ -331,11 +332,12 @@ body.messenger-mode .desktop-blur{display:none}
 .intro-chevron{
   position:absolute;right:13px;bottom:11px;
   width:18px;height:18px;
-  display:flex;align-items:center;justify-content:center;
+  display:none;align-items:center;justify-content:center;
   color:rgba(255,255,255,0.85);
   transition:transform .25s ease;
   pointer-events:none;
 }
+.intro-bubble.has-more .intro-chevron{display:flex}
 .intro-bubble.expanded .intro-chevron{transform:rotate(180deg)}
 
 /* 메시지 컨테이너 */
@@ -383,7 +385,7 @@ body.messenger-mode .desktop-blur{display:none}
 
 /* 버블 공통 */
 .msg-bubble{
-  padding:13px 16px;border-radius:18px;
+  padding:9px 13px;border-radius:18px;
   font-size:15px;line-height:1.55;letter-spacing:-0.2px;
   overflow-wrap:break-word;
   width:fit-content;max-width:100%;
@@ -2530,11 +2532,16 @@ async function renderChatFeed() {
 
   const intro = document.createElement('div');
   intro.className = 'intro-bubble';
-  intro.onclick = () => intro.classList.toggle('expanded');
+  intro.onclick = () => { if (intro.classList.contains('has-more')) intro.classList.toggle('expanded'); };
   intro.innerHTML = `
     <div class="intro-text"><b>소개</b>${escapeHtml(INTRO_TEXT)}</div>
     <span class="intro-chevron"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>`;
   feed.appendChild(intro);
+  // 텍스트가 실제로 잘릴 때만 펼치기 아이콘 노출
+  const introText = intro.querySelector('.intro-text');
+  if (introText && introText.scrollHeight > introText.clientHeight + 1) {
+    intro.classList.add('has-more');
+  }
 
   const timeHeader = document.createElement('div');
   timeHeader.className = 'msg-time';
