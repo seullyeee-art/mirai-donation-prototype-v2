@@ -1437,7 +1437,7 @@ body.intro-mode .stat-panel{display:none !important}
 .settings-model-chip svg{color:var(--primary-normal)}
 .settings-mir-chip{
   display:inline-flex;align-items:center;gap:5px;
-  padding:6px 12px;border-radius:999px;
+  padding:7px 11px;border-radius:9px;line-height:1;
   background:var(--fill-alternative);
   color:var(--label-normal);font-size:13px;font-weight:600;
 }
@@ -1461,7 +1461,7 @@ body.intro-mode .stat-panel{display:none !important}
 }
 .settings-row{
   display:flex;align-items:center;gap:14px;
-  padding:11px 4px;
+  padding:9px 4px;
 }
 .settings-row-text{flex:1;min-width:0}
 /* IMG_1971: 메뉴 박스 그룹 */
@@ -1939,7 +1939,7 @@ body.intro-mode .stat-panel{display:none !important}
 .ss-emoji img{width:19px;height:19px;object-fit:contain}
 .ss-item.selected{border-color:var(--primary-normal);background:rgba(60,200,168,0.08)}
 .ss-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
-.ss-name{font-size:16px;font-weight:800;color:var(--label-strong);display:inline-flex;align-items:center;gap:6px}
+.ss-name{font-size:15px;font-weight:700;color:var(--label-strong);display:inline-flex;align-items:center;gap:6px}
 .ss-en{font-size:11.5px;font-weight:600;color:var(--label-alternative)}
 .ss-radio{flex-shrink:0;width:22px;height:22px;border-radius:999px;border:2px solid rgba(255,255,255,0.25);position:relative;box-sizing:border-box}
 .ss-item.selected .ss-radio{border-color:var(--primary-normal);background:var(--primary-normal)}
@@ -2260,7 +2260,7 @@ body.intro-mode .stat-panel{display:none !important}
       <img class="persona-card-av" src="./images/persona/1.png" alt="페르소나">
       <span class="persona-card-name">예슬 <span class="persona-card-sex"><img src="https://static.toss.im/2d-emojis/svg/u2640.svg" alt="여성"></span></span>
       <span class="persona-card-badge">사용 중</span>
-      <button class="persona-card-use" onclick="selectPersona(0)">사용하기</button>
+      <button class="persona-card-use" onclick="selectPersona(this)">사용하기</button>
     </div>
     <div class="persona-card-desc">신원 설명이 아직 추가되지 않았습니다. 추가하면 캐릭터가 당신을 기억할 수 있어 채팅이 더 가까워집니다.</div>
   </div>
@@ -2269,7 +2269,7 @@ body.intro-mode .stat-panel{display:none !important}
       <img class="persona-card-av" src="./images/persona/2.png" alt="페르소나">
       <span class="persona-card-name">도윤 <span class="persona-card-sex male"><img src="https://static.toss.im/2d-emojis/svg/u2642.svg" alt="남성"></span></span>
       <span class="persona-card-badge">사용 중</span>
-      <button class="persona-card-use" onclick="selectPersona(1)">사용하기</button>
+      <button class="persona-card-use" onclick="selectPersona(this)">사용하기</button>
     </div>
     <div class="persona-card-desc">조용하고 사려 깊은 성격. 관찰을 좋아하고 말수가 적습니다.</div>
   </div>
@@ -2499,10 +2499,7 @@ body.intro-mode .stat-panel{display:none !important}
 <div class="settings-screen" id="settingsScreen">
   <div class="settings-header">
     <div class="settings-header-left">
-      <span class="settings-model-chip">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L13.7 10.3L22 12L13.7 13.7L12 22L10.3 13.7L2 12L10.3 10.3Z"/></svg>
-        Free
-      </span>
+      <button class="mmx-badge" onclick="openMiraiSub()"><i class="ph-fill ph-crown-simple mmx-crown"></i><span class="mmx-text">MIRAI MAX</span><i class="ph-bold ph-caret-right mmx-caret"></i></button>
       <span class="settings-mir-chip">
         <img src="./images/mir.png" alt="미르"> 33
       </span>
@@ -3094,11 +3091,11 @@ function resetItAnim() {
   if (body) body.scrollTop = 0;
 }
 // 페르소나 전환: 선택 카드 활성화 + 입력바 프로필 변경
-function selectPersona(idx) {
-  const cards = document.querySelectorAll('#personaSheet .persona-card');
-  cards.forEach((c, i) => c.classList.toggle('active', i === idx));
-  const card = cards[idx];
+function selectPersona(ref) {
+  const cards = [...document.querySelectorAll('#personaSheet .persona-card')];
+  const card = (typeof ref === 'number') ? cards[ref] : (ref && ref.closest ? ref.closest('.persona-card') : ref);
   if (!card) { showToast('페르소나 변경됨'); return; }
+  cards.forEach(c => c.classList.toggle('active', c === card));
   const av = card.querySelector('.persona-card-av');
   const nameEl = card.querySelector('.persona-card-name');
   const descEl = card.querySelector('.persona-card-desc');
@@ -3111,6 +3108,9 @@ function selectPersona(idx) {
   if (sName && nameEl) sName.innerHTML = nameEl.innerHTML;
   if (sSub && descEl) sSub.textContent = descEl.textContent;
   if (sAv && av) sAv.src = av.getAttribute('src');
+  // 사용 중 페르소나를 목록 상단으로
+  const firstCard = card.parentElement.querySelector('.persona-card');
+  if (firstCard && firstCard !== card) card.parentElement.insertBefore(card, firstCard);
   showToast('페르소나 변경됨');
 }
 function openPersonaSheet() {
@@ -4023,8 +4023,8 @@ function sendMessage(fromAuto) {
   nameText.classList.add('user-name');
   // 유저 메시지일 때 TTS 파동 + 편집 연필 + 되돌리기 숨김
   document.getElementById('ttsIndicator').style.display = 'none';
-  document.getElementById('dlgEditBtn').style.display = 'none';
-  document.getElementById('dlgReportBtn').style.display = 'none';
+  const _eBtn = document.getElementById('dlgEditBtn'); if (_eBtn) _eBtn.style.display = 'none';
+  const _rBtn = document.getElementById('dlgReportBtn'); if (_rBtn) _rBtn.style.display = 'none';
   document.getElementById('prevTurnBtn').style.display = 'none';
   const dlgText = document.getElementById('dlgText');
   dlgText.style.color = 'var(--label-normal)';
@@ -4072,8 +4072,8 @@ function injectDialogues(newDialogues) {
   nt.textContent = '셀린';
   nt.classList.remove('user-name');
   document.getElementById('ttsIndicator').style.display = '';
-  document.getElementById('dlgEditBtn').style.display = '';
-  document.getElementById('dlgReportBtn').style.display = '';
+  const _e2 = document.getElementById('dlgEditBtn'); if (_e2) _e2.style.display = '';
+  const _r2 = document.getElementById('dlgReportBtn'); if (_r2) _r2.style.display = '';
   document.getElementById('prevTurnBtn').style.display = '';
   document.getElementById('progressLoading').style.display = 'none';
   document.querySelector('.progress-label').style.display = '';
