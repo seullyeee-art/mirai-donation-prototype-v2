@@ -3873,8 +3873,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (choicesVisible) toggleChoices(); // 인풋 터치하면 선택지 자동 닫힘
     const grid = document.getElementById('actionGrid'); // 인풋 터치하면 더보기 그리드 닫힘
     if (grid && grid.classList.contains('open')) toggleActionGrid();
-    const ib = document.getElementById('inputBadges'); // 입력창 활성화 시 상단 뱃지 숨김
-    if (ib) ib.classList.add('badges-hidden');
   });
   // 입력바·그리드 바깥을 터치하면 더보기 그리드 닫힘 (포커스 아웃)
   document.addEventListener('click', (e) => {
