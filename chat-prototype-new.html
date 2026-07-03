@@ -382,14 +382,14 @@ body{
 .tap-coach-chip{
   display:inline-flex;align-items:center;gap:5px;
   height:34px;padding:0 14px;border-radius:999px;
-  background:rgba(255,255,255,0.12);
-  border:1px solid rgba(255,255,255,0.16);
+  background:rgba(255,255,255,0.3);
+  border:1px solid rgba(255,255,255,0.28);
   -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
   font-size:13px;font-weight:600;color:rgba(255,255,255,0.92);
   letter-spacing:-0.1px;
 }
 .tap-coach-chip svg{width:15px;height:15px}
-.tap-coach-chip.next{background:rgba(20,195,145,0.2);border-color:rgba(20,195,145,0.4);color:#fff}
+.tap-coach-chip.next{background:rgba(20,195,145,0.45);border-color:rgba(20,195,145,0.6);color:#fff}
 .tap-coach-dismiss{
   margin-top:30px;
   font-size:15px;font-weight:600;color:#fff;
@@ -490,7 +490,10 @@ body{
   margin-left:auto;
   background:transparent;
   padding:0;
+  transition:opacity 0.25s ease;
 }
+/* 로딩(잠시 기다려주세요) 중에는 로그·되돌리기·말풍선 버튼 세트 페이드 */
+.progress-icons.loading-faded{opacity:0;pointer-events:none}
 .prog-icon-btn{
   width:30px;height:30px;border-radius:50%;
   background:transparent;border:none;padding:0;cursor:pointer;
@@ -2102,10 +2105,6 @@ body.intro-mode .stat-panel{display:none !important}
         <button class="prog-icon-btn" id="chatLogBtn" onclick="showChatLog()" title="대화 로그"><img src="./images/icon/history.svg?v=2" alt="로그" style="width:18px;height:18px"></button>
         <button class="prog-icon-btn" id="prevTurnBtn" onclick="confirmUndoTurn()" title="되돌리기"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 010 11H11"/></svg></button>
         <button class="prog-icon-btn" id="statToggleBtn" onclick="toggleStats()" title="스탯 토글"><img id="statToggleIcon" src="./images/icon/chat-bubble.svg?v=7" alt="스탯" style="width:18px;height:18px"></button>
-        <!-- 대사 수정/신고 아이콘 숨김 (신고는 더보기 메뉴로 이동)
-        <button class="prog-icon-btn" id="dlgEditBtn" onclick="showEditModal()" title="대사 수정"></button>
-        <button class="prog-icon-btn" id="dlgReportBtn" onclick="reportMessage()" title="신고하기"></button>
-        -->
       </div>
     </div>
     <div class="stall-banner" id="stallBanner">
@@ -2117,7 +2116,6 @@ body.intro-mode .stat-panel{display:none !important}
       <button class="input-badge" onclick="openModelSheet()"><i class="ph-fill ph-sparkle"></i><span>대화 모델</span></button>
       <button class="input-badge" onclick="openQuickReply()"><i class="ph-fill ph-lightning"></i><span>이벤트</span></button>
       <button class="input-badge" onclick="sendInnerThought()"><svg class="badge-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 3C6.48 3 2 6.86 2 11.5c0 2.3 1.1 4.38 2.9 5.9L4 21l4.4-1.5c1.1.32 2.3.5 3.6.5 5.52 0 10-3.86 10-8.5S17.52 3 12 3Zm0 6.3c.9-1.05 2.4-1.33 3.5-.4 1.13.95 1.3 2.56.37 3.72-.5.63-2.02 1.96-3.13 2.9a1.2 1.2 0 0 1-1.48 0c-1.11-.94-2.63-2.27-3.13-2.9-.93-1.16-.76-2.77.37-3.72 1.1-.93 2.6-.65 3.5.4Z"/></svg><span>속마음</span></button>
-      <!-- <button class="input-badge" onclick="showToast('메모리 (준비중)')"><i class="ph-fill ph-brain"></i><span>메모리</span></button> -->
     </div>
     <div class="sub-banner" id="subBanner">
       <span class="sub-banner-text">기본 입력은 <b>100자</b>까지 가능해요</span>
@@ -2129,6 +2127,7 @@ body.intro-mode .stat-panel{display:none !important}
           <svg class="ic-bulb" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M4.73699 13.4097V13.8037C4.73699 14.9997 5.79033 15.977 6.98566 15.977H9.02366C10.2197 15.977 11.2723 14.9917 11.2723 13.8037V13.4097H4.73699Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M7.99951 0.0297943L8.00684 0.0224609C4.53418 0.0224609 1.71484 2.84113 1.71484 6.31579C1.71484 7.64979 2.14418 8.87846 2.85351 9.90313C3.75818 11.2298 4.51951 11.2898 4.72951 12.3298H11.2855C11.5115 11.4858 12.0468 11.2371 12.7102 10.4758C12.7628 10.4151 12.8235 10.3471 12.8762 10.2798C12.9815 10.1445 13.0875 10.0005 13.2002 9.82779C13.9088 8.79579 14.2848 7.57446 14.2848 6.32313C14.2842 2.84113 11.4735 0.0297943 7.99951 0.0297943ZM10.6462 6.87179L8.95484 7.46046C8.88151 7.46046 8.88151 7.53379 8.88151 7.53379L8.29351 9.29846C8.22018 9.59246 7.85218 9.59246 7.70551 9.29846L7.11751 7.60713C7.11751 7.53379 7.04418 7.53379 7.04418 7.53379L5.35284 6.94579C5.05884 6.79846 5.05884 6.43113 5.35284 6.35779L7.04418 5.76979C7.11751 5.76979 7.11751 5.69646 7.11751 5.69646L7.70551 4.00513C7.77884 3.71113 8.14684 3.71113 8.29351 4.00513L8.88151 5.62246C8.88151 5.69579 8.95484 5.69579 8.95484 5.69579L10.6462 6.28379C10.9402 6.43113 10.9402 6.79846 10.6462 6.87179Z" fill="currentColor"/></svg>
         </button>
         <textarea class="input-field" placeholder="메시지를 입력하세요..." rows="1"></textarea>
+        <button class="act-circle collapse-only" onclick="insertAsterisk()" title="강조" aria-label="강조"><i class="ph-bold ph-asterisk"></i></button>
         <button class="act-circle collapse-only end-toggle plus-badge" onclick="onEndBtn()" title="더보기" aria-label="더보기">
           <i class="ph-fill ph-plus-circle ic-plus"></i>
           <img class="ic-send" src="./images/icon/send.svg?v=2" alt="전송">
@@ -2286,9 +2285,9 @@ body.intro-mode .stat-panel{display:none !important}
 
 <!-- Model Sheet -->
 <div class="model-sheet" id="modelSheet">
+  <div class="ds-handle"></div>
   <div class="model-sheet-header">
     <span class="model-sheet-title">모델 선택</span>
-    <button class="model-sheet-close" onclick="closeModelSheet2()" aria-label="닫기"><i class="ph ph-x"></i></button>
   </div>
   <div class="model-sheet-list">
     <button class="model-opt selected" onclick="selectModelOpt(this,'대화 모델')">
@@ -3213,10 +3212,11 @@ function closeModelSheet2() {
 }
 // 미라이 MAX 구독 전면 팝업
 function openMiraiSub() {
-  closeOtherSheets();
-  document.getElementById('overlayBackdrop').classList.remove('show');
-  const m = document.getElementById('miraiSubModal');
-  if (m) m.classList.add('show');
+  // MIRAI MAX 팝업 임시 비활성화 (추후 다른 동작 연결 예정)
+  // closeOtherSheets();
+  // document.getElementById('overlayBackdrop').classList.remove('show');
+  // const m = document.getElementById('miraiSubModal');
+  // if (m) m.classList.add('show');
 }
 function closeMiraiSub() {
   const m = document.getElementById('miraiSubModal');
@@ -3245,8 +3245,8 @@ function toggleActionGrid() {
   const open = grid.classList.toggle('open');
   document.querySelectorAll('.end-toggle').forEach(b => b.classList.toggle('action-open', open));
   document.getElementById('app').classList.toggle('action-open', open); // 뒤 블러+그라디언트
-  const ib = document.getElementById('inputBadges'); // 그리드 열리면 상단 뱃지 숨김
-  if (ib) ib.classList.toggle('badges-hidden', open);
+  const ib = document.getElementById('inputBadges'); // 그리드 열려도 상단 뱃지 유지
+  if (ib) ib.classList.remove('badges-hidden');
   if (open && choicesVisible) toggleChoices(); // 그리드 열리면 선택지 off
 }
 function openPersonaFromGrid() {
@@ -4024,8 +4024,6 @@ function sendMessage(fromAuto) {
   nameText.classList.add('user-name');
   // 유저 메시지일 때 TTS 파동 + 편집 연필 + 되돌리기 숨김
   document.getElementById('ttsIndicator').style.display = 'none';
-  const _eBtn = document.getElementById('dlgEditBtn'); if (_eBtn) _eBtn.style.display = 'none';
-  const _rBtn = document.getElementById('dlgReportBtn'); if (_rBtn) _rBtn.style.display = 'none';
   document.getElementById('prevTurnBtn').style.display = 'none';
   const dlgText = document.getElementById('dlgText');
   dlgText.style.color = 'var(--label-normal)';
@@ -4036,6 +4034,7 @@ function sendMessage(fromAuto) {
   // progress-row: 진행 라벨 숨기고 로딩 즉시 표시 (타이핑과 동시)
   document.querySelector('.progress-label').style.display = 'none';
   document.getElementById('progressLoading').style.display = 'flex';
+  document.querySelector('.progress-icons').classList.add('loading-faded'); // 로딩 중 우측 버튼 세트 페이드
   // 유저 대사 중 탭 유도 리플 숨김
   const ripple = document.getElementById('tapHintRipple');
   if (ripple) ripple.classList.remove('show');
@@ -4073,10 +4072,9 @@ function injectDialogues(newDialogues) {
   nt.textContent = '셀린';
   nt.classList.remove('user-name');
   document.getElementById('ttsIndicator').style.display = '';
-  const _e2 = document.getElementById('dlgEditBtn'); if (_e2) _e2.style.display = '';
-  const _r2 = document.getElementById('dlgReportBtn'); if (_r2) _r2.style.display = '';
   document.getElementById('prevTurnBtn').style.display = '';
   document.getElementById('progressLoading').style.display = 'none';
+  document.querySelector('.progress-icons').classList.remove('loading-faded'); // 로딩 끝나면 우측 버튼 세트 복원
   document.querySelector('.progress-label').style.display = '';
   document.getElementById('dlgTapArea').style.display = '';
   document.querySelector('.name-row-wrap').style.display = '';
