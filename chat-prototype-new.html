@@ -3858,7 +3858,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const inputWrapEl = document.querySelector('.input-wrap');
   ta.addEventListener('input', () => {
     ta.style.height = 'auto';
-    ta.style.height = Math.min(ta.scrollHeight, 110) + 'px';
+    // 빈 값이면 인라인 height 제거해 rows=1 기본 높이로 복귀 (지운 뒤 미세하게 커지는 것 방지)
+    ta.style.height = ta.value ? Math.min(ta.scrollHeight, 110) + 'px' : '';
     refreshSendUI();
     // 기본 100자 초과 → 에러(레드 보더 + 전송 비활성) + 구독 권유 배너
     const over = ta.value.length > 100;
@@ -4080,7 +4081,8 @@ function injectDialogues(newDialogues) {
   document.querySelector('.input-wrap').style.display = 'none';
   document.getElementById('inputBadges').classList.remove('show');
   document.querySelectorAll('.choice-card').forEach(c => c.classList.remove('selected'));
-  document.querySelector('.input-field').value = '';
+  const _if = document.querySelector('.input-field');
+  _if.value = ''; _if.style.height = ''; // 재표시 대비 높이 초기화
   const pb = document.getElementById('prevTurnBtn');
   if (pb) pb.disabled = true;
   document.getElementById('continueTurnBtn').disabled = true;
