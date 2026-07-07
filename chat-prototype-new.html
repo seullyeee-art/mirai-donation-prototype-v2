@@ -1232,8 +1232,10 @@ body.intro-mode .stat-panel{display:none !important}
 .persona-card .persona-card-use{display:inline-block}
 .persona-card.active .persona-card-use{display:none}
 .persona-card-sex.male{color:#7db8f5}
+/* 아바타 오른쪽: 이름 윗줄 / 설명 아랫줄 세로 정렬 */
+.persona-card-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
 .persona-card-desc{
-  margin-top:9px;font-size:12.5px;
+  font-size:12.5px;
   color:var(--label-alternative);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
@@ -2258,20 +2260,24 @@ body.intro-mode .stat-panel{display:none !important}
   <div class="persona-card active">
     <div class="persona-card-head">
       <img class="persona-card-av" src="./images/persona/1.png" alt="페르소나">
-      <span class="persona-card-name">예슬 <span class="persona-card-sex"><img src="https://static.toss.im/2d-emojis/svg/u2640.svg" alt="여성"></span></span>
+      <div class="persona-card-body">
+        <span class="persona-card-name">예슬 <span class="persona-card-sex"><img src="https://static.toss.im/2d-emojis/svg/u2640.svg" alt="여성"></span></span>
+        <div class="persona-card-desc">신원 설명이 아직 추가되지 않았습니다. 추가하면 캐릭터가 당신을 기억할 수 있어 채팅이 더 가까워집니다.</div>
+      </div>
       <span class="persona-card-badge">사용 중</span>
       <button class="persona-card-use" onclick="selectPersona(this)">사용하기</button>
     </div>
-    <div class="persona-card-desc">신원 설명이 아직 추가되지 않았습니다. 추가하면 캐릭터가 당신을 기억할 수 있어 채팅이 더 가까워집니다.</div>
   </div>
   <div class="persona-card">
     <div class="persona-card-head">
       <img class="persona-card-av" src="./images/persona/2.png" alt="페르소나">
-      <span class="persona-card-name">도윤 <span class="persona-card-sex male"><img src="https://static.toss.im/2d-emojis/svg/u2642.svg" alt="남성"></span></span>
+      <div class="persona-card-body">
+        <span class="persona-card-name">도윤 <span class="persona-card-sex male"><img src="https://static.toss.im/2d-emojis/svg/u2642.svg" alt="남성"></span></span>
+        <div class="persona-card-desc">조용하고 사려 깊은 성격. 관찰을 좋아하고 말수가 적습니다.</div>
+      </div>
       <span class="persona-card-badge">사용 중</span>
       <button class="persona-card-use" onclick="selectPersona(this)">사용하기</button>
     </div>
-    <div class="persona-card-desc">조용하고 사려 깊은 성격. 관찰을 좋아하고 말수가 적습니다.</div>
   </div>
   <button class="persona-create" onclick="openPersonaCreate()">
     <span class="persona-create-icon"><i class="ph-bold ph-plus"></i></span>
